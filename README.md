@@ -1,11 +1,31 @@
-Inspection Framwork Project
-====================
+# Inspection Framwork Project
 
-Repository of the inspection framework.
+The main goal of the Inpection Framework project is to provide an inspection tool.
 
-Architecture:
-  -Database: MongoDB
-  -Business layer: Java 7 + spring framework
-  -Front-end: HTML5 + AngularJS / Android
-  
-- testing
+## Architecture overview:
+
+### Database
+
+MongoDB
+
+### Server layer
+
+Spring Framework (Java 1.7)
+
+* Spring Data MongoDB
+* Spring Core
+* Spring Security
+* Spring RESTful Web Services
+
+### Client layer
+
+* AngularJS
+* CSS
+* Javascript
+* Android
+
+## Platforms supported
+
+* Android
+* Vuzix 
+* Desktop (Chrome, Firefox, IE, Safari)
