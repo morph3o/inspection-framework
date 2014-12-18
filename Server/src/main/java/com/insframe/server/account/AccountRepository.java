@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Transactional(readOnly = true)
 public class AccountRepository {
 	
-	@PersistenceContext
 	private EntityManager entityManager;
 	
 	@Inject
