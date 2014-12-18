@@ -3,7 +3,6 @@
 The main goal of the Inpection Framework project is to provide an inspection tool.
 
 ## Architecture overview:
-
 ![Architecture Overview](https://cloud.githubusercontent.com/assets/1556931/5489347/a3290a44-86c8-11e4-8fb7-be10b2278bd4.png)
 
 ### Database
@@ -13,10 +12,9 @@ The main goal of the Inpection Framework project is to provide an inspection too
 #### Enitty Relationship
 ![Entity Relationship](https://cloud.githubusercontent.com/assets/1556931/5489386/1cd566f8-86c9-11e4-8de8-01983e5ac54c.png)
 
-
 ### Server layer
 
-* Java Version 1.7
+* [Java Version 1.7](http://www.oracle.com/technetwork/es/java/javase/downloads/jdk7-downloads-1880260.html)
 
 Spring Project
 
