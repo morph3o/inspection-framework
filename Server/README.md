@@ -1,6 +1,6 @@
 # Server layer
 
-* Java Version 1.7
+* [Java version 1.7](http://www.oracle.com/technetwork/es/java/javase/downloads/jdk7-downloads-1880260.html)
 
 Spring Framework
 
