@@ -10,16 +10,18 @@ MongoDB
 
 ### Server layer
 
-Spring Framework (Java 1.7)
+* Java Version 1.7
 
-* Spring Data MongoDB
-* Spring Core
-* Spring Security
-* Spring RESTful Web Services
+Spring Project
+
+* [Spring Data MongoDB](http://projects.spring.io/spring-data-mongodb/)
+* [Spring MVC](http://projects.spring.io/spring-framework/)
+* [Spring Security](http://projects.spring.io/spring-security/)
+* [Spring RESTful Web Services](http://projects.spring.io/spring-hateoas/)
 
 ### Client layer
 
-* AngularJS
+* [AngularJS](http://angularjs.org/)
 * CSS
 * Javascript
 * Android
