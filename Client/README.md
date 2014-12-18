@@ -1,1 +1,6 @@
-This is the client application of the inspection framework
+### Client layer
+
+* AngularJS
+* CSS
+* Javascript
+* Android
