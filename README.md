@@ -4,6 +4,8 @@ The main goal of the Inpection Framework project is to provide an inspection too
 
 ## Architecture overview:
 
+![alt tag](http://github.com/morph3o/inspection-framework/blob/master/arch_overview.png)
+
 ### Database
 
 MongoDB
