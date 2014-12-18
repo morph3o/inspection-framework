@@ -8,7 +8,11 @@ The main goal of the Inpection Framework project is to provide an inspection too
 
 ### Database
 
-MongoDB
+* [MongoDB](http://www.mongodb.org/)
+
+#### Enitty Relationship
+![Entity Relationship](https://cloud.githubusercontent.com/assets/1556931/5489386/1cd566f8-86c9-11e4-8de8-01983e5ac54c.png)
+
 
 ### Server layer
 
