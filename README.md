@@ -1,4 +1,4 @@
-# Inspection Framwork Project
+# Inspection Framework Project
 
 The main goal of the Inpection Framework project is to provide an inspection tool.
 
