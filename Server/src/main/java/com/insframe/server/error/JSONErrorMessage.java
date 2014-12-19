@@ -1,10 +1,10 @@
 package com.insframe.server.error;
 
-public class JSONError {
+public class JSONErrorMessage {
 	
 	private String errorMassage;
 
-	public JSONError(String errorMassage) {
+	public JSONErrorMessage(String errorMassage) {
 		super();
 		this.errorMassage = errorMassage;
 	}

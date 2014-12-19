@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.insframe.server.data.repository.UserRepository;
-import com.insframe.server.error.JSONError;
+import com.insframe.server.error.JSONErrorMessage;
 import com.insframe.server.model.User;
 
 @RestController
@@ -20,7 +20,7 @@ public class UserController {
 		if(userRepository.findByLastName(lastName).size() > 0){
 			return (User) userRepository.findByLastName(lastName).get(0);
 		} else {
-			return new JSONError("There is no user with last name: "+lastName);
+			return new JSONErrorMessage("There is no user with last name: "+lastName);
 		}
     }
 
