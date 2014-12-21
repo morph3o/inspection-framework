@@ -2,19 +2,19 @@ package com.insframe.server.error;
 
 public class JSONError {
 	
-	private String errorMassage;
+	private String errorMessage;
 
-	public JSONError(String errorMassage) {
+	public JSONError(String errorMessage) {
 		super();
-		this.errorMassage = errorMassage;
+		this.errorMessage = errorMessage;
 	}
 
 	public String getErrorMassage() {
-		return errorMassage;
+		return errorMessage;
 	}
 
-	public void setErrorMassage(String errorMassage) {
-		this.errorMassage = errorMassage;
+	public void setErrorMassage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 	
 }

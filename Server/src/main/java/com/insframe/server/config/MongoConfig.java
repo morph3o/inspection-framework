@@ -2,13 +2,8 @@ package com.insframe.server.config;
 
 import java.net.UnknownHostException;
 
-import com.insframe.server.data.repository.RepositoryPackage;
-import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -18,6 +13,9 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoTypeMapper;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+
+import com.insframe.server.data.repository.RepositoryPackage;
+import com.mongodb.MongoClient;
 
 @Configuration
 @EnableMongoRepositories(basePackageClasses=RepositoryPackage.class)
