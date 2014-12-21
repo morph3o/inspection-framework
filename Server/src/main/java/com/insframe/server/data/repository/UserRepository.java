@@ -9,4 +9,7 @@ import com.insframe.server.model.User;
 public interface UserRepository extends MongoRepository<User, String>{
 	public User findByFirstName(String firstName);
     public List<User> findByLastName(String lastName);
+    public User findByUserName(String username);
+    
+    public Long deleteUserByUserName(String lastname);
 }
