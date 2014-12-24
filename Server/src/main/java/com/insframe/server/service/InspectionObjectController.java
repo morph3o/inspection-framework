@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.insframe.server.data.repository.InspectionObjectRepository;
-import com.insframe.server.error.JSONError;
+import com.insframe.server.error.JSONErrorMessage;
 import com.insframe.server.model.InspectionObject;
 
 @RestController
@@ -20,7 +20,7 @@ public class InspectionObjectController {
 		if(inspectionObjectRepository.findByCustomerName(customerName).size() > 0){
 			return (InspectionObject) inspectionObjectRepository.findByCustomerName(customerName).get(0);
 		} else {
-			return new JSONError("There is no inspection object with customer name: "+customerName);
+			return new JSONErrorMessage("There is no inspection object with customer name: "+customerName);
 		}
     }
 

@@ -21,7 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 public class UserServiceTest {
 
 	@InjectMocks
-	private UserService userService = new UserService();
+	private UserSrv userService = new UserSrv();
 
 	@Mock
 	private AccountRepository accountRepositoryMock;

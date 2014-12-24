@@ -1,4 +1,4 @@
-package com.insframe.server.service;
+package com.insframe.server.rest;
 
 import java.security.Principal;
 

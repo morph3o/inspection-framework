@@ -11,7 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.*;
 
-public class UserService implements UserDetailsService {
+public class UserSrv implements UserDetailsService {
 	
 	@Autowired
 	private AccountRepository accountRepository;
