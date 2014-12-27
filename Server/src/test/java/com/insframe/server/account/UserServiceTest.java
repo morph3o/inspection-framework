@@ -29,13 +29,13 @@ public class UserServiceTest {
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
 
-	@Test
-	public void shouldInitializeWithTwoDemoUsers() {
-		// act
-		userService.initialize();
-		// assert
-		verify(accountRepositoryMock, times(2)).save(any(Account.class));
-	}
+//	@Test
+//	public void shouldInitializeWithTwoDemoUsers() {
+//		// act
+//		userService.initialize();
+//		// assert
+//		verify(accountRepositoryMock, times(2)).save(any(Account.class));
+//	}
 
 	@Test
 	public void shouldThrowExceptionWhenUserNotFound() {

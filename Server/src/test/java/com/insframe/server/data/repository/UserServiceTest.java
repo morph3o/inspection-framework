@@ -1,15 +1,11 @@
 package com.insframe.server.data.repository;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.neo4j.cypher.internal.compiler.v2_1.ast.rewriters.useAliasesInSortSkipAndLimit;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import com.insframe.server.config.WebAppConfigurationAware;
 import com.insframe.server.model.User;

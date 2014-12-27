@@ -1,6 +1,7 @@
 package com.insframe.server.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection="inspection_objects")
@@ -8,6 +9,9 @@ public class InspectionObject {
 	
 	@Id
 	private String id;
+
+
+	@Indexed(unique=true)
 	private String objectName;
 	private String description;
 	private String location;
@@ -22,6 +26,12 @@ public class InspectionObject {
 		this.description = description;
 		this.location = location;
 		this.customerName = customerName;
+	}
+	
+	@Override
+	public String toString(){
+		return "InspectionObject [id=" + id + ", objectName=" + objectName + ", description="
+				+ description + ", location=" + location+ ", customerName=" + customerName + "]";
 	}
 
 	public String getDescription() {
@@ -54,5 +64,13 @@ public class InspectionObject {
 
 	public void setLocation(String location) {
 		this.location = location;
+	}
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 }
