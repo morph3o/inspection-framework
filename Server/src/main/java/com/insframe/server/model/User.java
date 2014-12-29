@@ -1,5 +1,6 @@
 package com.insframe.server.model;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,6 +11,7 @@ public class User {
 	private String id;
 	private String userName;
 	private String emailAddress;
+	@JsonIgnore
 	private String password;
 	private String role;
 	private String lastName;

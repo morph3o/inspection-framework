@@ -3,6 +3,7 @@ package com.insframe.server.support.web;
 /**
  * A message to be displayed in web context. Depending on the type, different style will be applied.
  */
+@SuppressWarnings("serial")
 public class Message implements java.io.Serializable {
     /**
      * Name of the flash attribute.
