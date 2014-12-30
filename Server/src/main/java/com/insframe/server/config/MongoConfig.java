@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.authentication.UserCredentials;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
@@ -27,10 +28,14 @@ class MongoConfig {
 	private int port;
 	@Value("${mongodb.database}")
 	private String database;
+	@Value("${mongodb.username}")
+	private String username;
+	@Value("${mongodb.password}")
+	private String password;
 
     @Bean
     public MongoDbFactory mongoDbFactory() throws UnknownHostException {
-        return new SimpleMongoDbFactory(new MongoClient(host, port), database);
+        return new SimpleMongoDbFactory(new MongoClient(host, port), database, new UserCredentials(username, password));
     }
 
     @Bean
