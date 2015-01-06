@@ -4,6 +4,7 @@ import java.net.UnknownHostException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.authentication.UserCredentials;
 import org.springframework.data.mongodb.MongoDbFactory;
@@ -13,7 +14,9 @@ import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoTypeMapper;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.RepositoryPackage;
 import com.mongodb.MongoClient;
@@ -42,6 +45,11 @@ class MongoConfig {
     public MongoTemplate mongoTemplate() throws UnknownHostException {
         MongoTemplate template = new MongoTemplate(mongoDbFactory(), mongoConverter());
         return template;
+    }
+
+    @Bean
+    public GridFsTemplate gridFsTemplate() throws UnknownHostException {
+      return new GridFsTemplate(mongoDbFactory(), mongoConverter());
     }
 
     @Bean

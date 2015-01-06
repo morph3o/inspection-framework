@@ -10,7 +10,6 @@ public class InspectionObject {
 	@Id
 	private String id;
 
-
 	@Indexed(unique=true)
 	private String objectName;
 	private String description;
