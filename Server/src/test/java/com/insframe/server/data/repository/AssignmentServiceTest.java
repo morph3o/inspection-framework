@@ -54,7 +54,7 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 		
 		InputStream is = new FileInputStream("bridge.jpg");
 		
-		bridgeAssignment.addAttachment(gridFsService.store(is, "bridge.jpg", "img/jpg", new FileMetaData("Ernst-Walz bridge Heidelberg")));
+		bridgeAssignment.addAttachment(gridFsService.store(is, "bridge.jpg", "image/jpeg", new FileMetaData("Ernst-Walz bridge Heidelberg")));
 		assignmentService.save(bridgeAssignment);
 	}
 	

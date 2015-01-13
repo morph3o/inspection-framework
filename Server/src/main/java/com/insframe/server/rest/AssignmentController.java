@@ -37,6 +37,16 @@ public class AssignmentController {
 		return savedAssignment;
 	}
 	
+//	@RequestMapping(value="/{id}/image", method=RequestMethod.GET)
+//	public void getItemImage(@PathVariable Long id, HttpServletResponse response) throws IOException
+//	{
+//	   Item item = service.loadItem(id);
+//	   response.setContentType(item.getImage().getContentType());
+//	   response.getOutputStream().write(item.getImage().getBytes());
+//
+//	   // don't close the output stream from the response
+//	} 
+	
 //	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.DELETE)
 //	public void deleteInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
 //		inspectionObjectService.deleteInspectionObjectByID(inspectionObjectId);
