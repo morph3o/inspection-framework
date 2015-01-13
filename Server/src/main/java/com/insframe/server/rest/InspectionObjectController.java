@@ -55,8 +55,8 @@ public class InspectionObjectController {
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.GET)
-	public void getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
-		inspectionObjectService.findById(inspectionObjectId);
+	public InspectionObject getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
+		return inspectionObjectService.findById(inspectionObjectId);
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.PUT)

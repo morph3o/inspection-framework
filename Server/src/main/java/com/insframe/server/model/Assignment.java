@@ -1,6 +1,5 @@
 package com.insframe.server.model;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,8 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.insframe.server.data.repository.GridFsRepository;
 
 @Document(collection="assignments")
 public class Assignment {
@@ -25,11 +22,11 @@ public class Assignment {
 	private List<Task> tasks;
 	private Date startDate;
 	private Date endDate;
+	private List<String> attachmentIds;
 	@DBRef
 	private User user;
 	@DBRef
 	private InspectionObject inspectionObject; 
-	private List<String> attachmentIds;
 	
 	public Assignment() {
 		super();
@@ -43,7 +40,7 @@ public class Assignment {
 	}
 	
 	public Assignment(String assignmentName, String description, Boolean isTemplate, List<Task> tasks,
-						Date startDate, Date endDate, User user, InspectionObject inspectionObject) {
+			Date startDate, Date endDate, User user, InspectionObject inspectionObject) {
 		super();
 		this.assignmentName = assignmentName;
 		this.description = description;
@@ -53,6 +50,21 @@ public class Assignment {
 		this.endDate = endDate;
 		this.user = user;
 		this.inspectionObject = inspectionObject;
+	}
+
+	
+	public Assignment(String assignmentName, String description, Boolean isTemplate, List<Task> tasks,
+						Date startDate, Date endDate, User user, InspectionObject inspectionObject, List<String> attachmentIds) {
+		super();
+		this.assignmentName = assignmentName;
+		this.description = description;
+		this.isTemplate = isTemplate;
+		this.tasks = tasks;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.user = user;
+		this.inspectionObject = inspectionObject;
+		this.attachmentIds = attachmentIds;
 	}
 	
 	@Override
@@ -69,14 +81,6 @@ public class Assignment {
 		}
 		attachmentIds.add(gridFsId);
 	}
-	
-//	public void addAttachment(InputStream inputStream, String fileName, String contentType, FileMetaData metaData) {
-//		GridFsRepository gridFsDao = new GridFsRepositoryImpl();
-//		if(attachmentIds == null){
-//			attachmentIds = new ArrayList<String>();
-//		}
-//		attachmentIds.add(gridFsDao.store(inputStream, fileName, contentType, metaData));
-//	}
 
 	public String getDescription() {
 		return description;
@@ -148,5 +152,13 @@ public class Assignment {
 
 	public void setInspectionObject(InspectionObject inspectionObject) {
 		this.inspectionObject = inspectionObject;
+	}
+
+	public List<String> getAttachmentIds() {
+		return attachmentIds;
+	}
+
+	public void setAttachmentIds(List<String> attachmentIds) {
+		this.attachmentIds = attachmentIds;
 	}
 }

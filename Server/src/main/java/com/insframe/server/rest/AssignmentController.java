@@ -3,24 +3,32 @@ package com.insframe.server.rest;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.insframe.server.error.InspectionObjectAccessException;
 import com.insframe.server.model.Assignment;
-import com.insframe.server.model.InspectionObject;
+import com.insframe.server.model.FileMetaData;
 import com.insframe.server.service.AssignmentService;
+import com.insframe.server.service.GridFsService;
 
 @RestController
 @RequestMapping("/assignment")
 public class AssignmentController {
 	@Autowired
 	private AssignmentService assignmentService;
+	
+	@Autowired
+	private GridFsService gridFsService;
 
 	@RequestMapping(method=RequestMethod.GET)
-    public Object getAssignments() throws InspectionObjectAccessException {		
+    public List<Assignment> getAssignments() throws InspectionObjectAccessException {		
 		List<Assignment> assignments = assignmentService.findAll();
 		
 		if(assignments.size() > 0){
@@ -32,34 +40,57 @@ public class AssignmentController {
     }
 	
 	@RequestMapping(method=RequestMethod.POST)
-	public Assignment createInspectionObject(@RequestBody Assignment assignment) {
+	public Assignment createAssignment(@RequestBody Assignment assignment) {
 		Assignment savedAssignment = assignmentService.save(assignment);
 		return savedAssignment;
 	}
 	
-//	@RequestMapping(value="/{id}/image", method=RequestMethod.GET)
-//	public void getItemImage(@PathVariable Long id, HttpServletResponse response) throws IOException
-//	{
-//	   Item item = service.loadItem(id);
-//	   response.setContentType(item.getImage().getContentType());
-//	   response.getOutputStream().write(item.getImage().getBytes());
-//
-//	   // don't close the output stream from the response
-//	} 
+	@RequestMapping(value="/{assignmentId}", method=RequestMethod.DELETE)
+	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws InspectionObjectAccessException {
+		assignmentService.deleteAssignmentById(assignmentId);
+	}
 	
-//	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.DELETE)
-//	public void deleteInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
-//		inspectionObjectService.deleteInspectionObjectByID(inspectionObjectId);
-//	}
-//	
-//	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.GET)
-//	public void getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
-//		inspectionObjectService.findById(inspectionObjectId);
-//	}
-//	
-//	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.PUT)
-//	public void updateInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId,
-//										 	@RequestBody InspectionObject inspectionObject) throws InspectionObjectAccessException {
-//		inspectionObjectService.updateById(inspectionObjectId, inspectionObject);
+	@RequestMapping(value="/{assignmentId}", method=RequestMethod.GET)
+	public Assignment getAssignmentById(@PathVariable("assignmentId") String assignmentId) throws InspectionObjectAccessException {
+		return assignmentService.findById(assignmentId);
+	}
+	
+	@RequestMapping(value="/{assignmentId}", method=RequestMethod.PUT)
+	public void updateAssignmentByID(@PathVariable("assignmentId") String assignmentId,
+										@RequestBody Assignment assignment) throws InspectionObjectAccessException {
+		assignmentService.updateById(assignmentId, assignment);
+	}
+	
+	
+	@RequestMapping(value="/{assignmentId}/attachment", method=RequestMethod.POST)
+	public @ResponseBody String addAttachment(@PathVariable("assignmentId") String assignmentId,
+												@RequestParam("fileUpload") MultipartFile file){
+		String name = file.getOriginalFilename();
+        if (!file.isEmpty()) {
+            try {
+            	assignmentService.addAttachment(assignmentId, file.getInputStream(), file.getOriginalFilename(), file.getContentType(), new FileMetaData("Test"));
+                return "You successfully uploaded " + name + " for assignment " + assignmentId + "!";
+            } catch (Exception e) {
+                return "You failed to upload " + name + " => " + e.getMessage();
+            }
+        } else {
+            return "You failed to upload " + name + " because the file was empty.";
+        }
+	}
+	
+//	@RequestMapping(value="/{assignmentId}/attachment/", method=RequestMethod.POST)
+//	public @ResponseBody String addAttachment(@PathVariable("assignmentId") String assignmentId,
+//												@RequestParam("file") MultipartFile file){
+//		String name = file.getOriginalFilename();
+//        if (!file.isEmpty()) {
+//            try {
+//            	assignmentService.addAttachment(assignmentId, file.getInputStream(), file.getOriginalFilename(), file.getContentType(), new FileMetaData("Test"));
+//                return "You successfully uploaded " + name + " for assignment " + assignmentId + "!";
+//            } catch (Exception e) {
+//                return "You failed to upload " + name + " => " + e.getMessage();
+//            }
+//        } else {
+//            return "You failed to upload " + name + " because the file was empty.";
+//        }
 //	}
 }

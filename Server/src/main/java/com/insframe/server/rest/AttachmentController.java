@@ -44,7 +44,7 @@ public class AttachmentController {
     }
 	
 	@RequestMapping(method=RequestMethod.POST)
-	public @ResponseBody String handleFileUpload(@RequestParam("file") MultipartFile file){
+	public @ResponseBody String handleFileUpload(@RequestParam("fileUpload") MultipartFile file){
 		String name = file.getOriginalFilename();
         if (!file.isEmpty()) {
             try {
