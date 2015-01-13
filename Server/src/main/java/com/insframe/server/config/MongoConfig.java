@@ -4,7 +4,9 @@ import java.net.UnknownHostException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.authentication.UserCredentials;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
@@ -12,7 +14,9 @@ import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoTypeMapper;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.RepositoryPackage;
 import com.mongodb.MongoClient;
@@ -27,16 +31,25 @@ class MongoConfig {
 	private int port;
 	@Value("${mongodb.database}")
 	private String database;
+	@Value("${mongodb.username}")
+	private String username;
+	@Value("${mongodb.password}")
+	private String password;
 
     @Bean
     public MongoDbFactory mongoDbFactory() throws UnknownHostException {
-        return new SimpleMongoDbFactory(new MongoClient(host, port), database);
+        return new SimpleMongoDbFactory(new MongoClient(host, port), database, new UserCredentials(username, password));
     }
 
     @Bean
     public MongoTemplate mongoTemplate() throws UnknownHostException {
         MongoTemplate template = new MongoTemplate(mongoDbFactory(), mongoConverter());
         return template;
+    }
+
+    @Bean
+    public GridFsTemplate gridFsTemplate() throws UnknownHostException {
+      return new GridFsTemplate(mongoDbFactory(), mongoConverter());
     }
 
     @Bean
