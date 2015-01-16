@@ -7,6 +7,8 @@ public class InspectionObjectAccessException extends
 	public static final String OBJECT_ID_NOT_FOUND_TEXT_ID = "error.no.inspectionobject.with.id";
 	public static final String NO_OBJECTS_FOUND_TEXT_ID = "error.no.inspectionobjects";
 	public static final String NO_OBJECTS_FOUND_BY_CUSTOMERNAME_TEXT_ID = "error.no.inspectionobject.with.customername";
+	public static final String NO_OBJECTS_FOUND_BY_OBJECTNAME_TEXT_ID = "error.no.inspectionobject.with.objectname";
+	
 
 	public InspectionObjectAccessException(String textId, String[] args) {
 		super(textId, args);

@@ -2,16 +2,14 @@ package com.insframe.server.model;
 
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import org.bson.types.ObjectId;
 
 public class Task {
 	public static final Integer STATE_INITIAL = 0;
 	public static final Integer STATE_IN_PROGRESS = 1;
 	public static final Integer STATE_FINISHED = 2;
+	
+	private String id;
 	private String taskName;
 	private String description;
 	private Integer state;
@@ -19,9 +17,11 @@ public class Task {
 	
 	public Task() {
 		super();
+		this.setId(ObjectId.get().toString());
 	}
 	
 	public Task(String taskName, String description, Integer state) {
+		this.setId(ObjectId.get().toString());
 		this.taskName = taskName;
 		this.description = description;
 		this.state = state;
@@ -29,7 +29,7 @@ public class Task {
 
 	@Override
 	public String toString(){
-		return "InspectionObject [taskName=" + taskName + ", description="
+		return "InspectionObject [taskId =" + id + ", taskName=" + taskName + ", description="
 				+ description + ", state=" + state + "]";
 	}
 
@@ -55,5 +55,21 @@ public class Task {
 
 	public void setState(Integer state) {
 		this.state = state;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public List<Task> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<Task> attachments) {
+		this.attachments = attachments;
 	}
 }

@@ -17,6 +17,9 @@ public class UserService {
 	@Autowired
 	private MongoOperations mongoOpts;
 	
+	public User findById(String id){
+		return userRepository.findById(id);
+	}
 	public User findByFirstName(String firstName){
 		return userRepository.findByFirstName(firstName);
 	}

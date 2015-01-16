@@ -7,8 +7,9 @@ public class InspectionFrameworkBaseException extends Exception {
 	private String messageId;
 	private String[] args;
 	
+	
 	public InspectionFrameworkBaseException(String messageId, String... args) {
-		super();
+		super(messageId);
 		this.messageId = messageId;
 		this.args = args;
 	}

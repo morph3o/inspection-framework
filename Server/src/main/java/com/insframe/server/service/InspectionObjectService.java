@@ -22,16 +22,33 @@ public class InspectionObjectService {
 		return inspectionObjectRepository.save(inspectionObject);
 	}
 	
-	public List<InspectionObject> findAll() {
-		return inspectionObjectRepository.findAll();
+	@SuppressWarnings("null")
+	public List<InspectionObject> findAll() throws InspectionObjectAccessException {
+    	List<InspectionObject> queriedInspectionObjectList = inspectionObjectRepository.findAll();
+    	if(queriedInspectionObjectList != null || queriedInspectionObjectList.size() > 0) {
+    		return queriedInspectionObjectList;
+    	} else{
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
+    	}
 	}
 	
-	public List<InspectionObject> findByCustomerName(String customerName) {
-		return inspectionObjectRepository.findByCustomerName(customerName);
+	@SuppressWarnings("null")
+	public List<InspectionObject> findByCustomerName(String customerName) throws InspectionObjectAccessException {
+    	List<InspectionObject> queriedInspectionObjectList = inspectionObjectRepository.findByCustomerName(customerName);
+    	if(queriedInspectionObjectList != null || queriedInspectionObjectList.size() > 0) {
+    		return queriedInspectionObjectList;
+    	} else{
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_CUSTOMERNAME_TEXT_ID,new String[]{customerName});
+    	}
 	}
 	
-	public InspectionObject findByObjectName(String objectName) {
-		return inspectionObjectRepository.findByObjectName(objectName);
+	public InspectionObject findByObjectName(String objectName) throws InspectionObjectAccessException {
+    	InspectionObject queriedInspectionObject = inspectionObjectRepository.findByObjectName(objectName);
+    	if(queriedInspectionObject != null) {
+    		return queriedInspectionObject;
+    	} else{
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_OBJECTNAME_TEXT_ID,new String[]{objectName});
+    	}
 	}
 	
     public void deleteAll(){
@@ -39,37 +56,28 @@ public class InspectionObjectService {
     }
     
     public void deleteInspectionObjectByID(String id) throws InspectionObjectAccessException{
-    	if(findById(id) != null) {;
-    		inspectionObjectRepository.delete(id);
-    	} else {
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
-    	}
+    	this.findById(id);
+    	inspectionObjectRepository.delete(id);
     }
     
-    public InspectionObject findById(String id){
-    	return inspectionObjectRepository.findById(id);
+    public InspectionObject findById(String id) throws InspectionObjectAccessException{
+    	InspectionObject queriedInspectionObject = inspectionObjectRepository.findById(id);
+    	if(queriedInspectionObject != null) {
+    		return queriedInspectionObject;
+    	} else{
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
+    	}
     }
     
     public InspectionObject updateById(String id, InspectionObject updateInspectionObject) throws InspectionObjectAccessException {
-    	InspectionObject oldInspectionObject = inspectionObjectRepository.findById(id);
-    	if(oldInspectionObject != null) {
-	    	if(!updateInspectionObject.getObjectName().equalsIgnoreCase(oldInspectionObject.getObjectName())){
-	    		oldInspectionObject.setObjectName(updateInspectionObject.getObjectName());
-			} 
-			if(!updateInspectionObject.getCustomerName().equalsIgnoreCase(oldInspectionObject.getCustomerName())){
-				oldInspectionObject.setCustomerName(updateInspectionObject.getCustomerName());
-			}
-			if(!updateInspectionObject.getDescription().equalsIgnoreCase(oldInspectionObject.getDescription())){
-				oldInspectionObject.setDescription(updateInspectionObject.getDescription());
-			}
-			if(!updateInspectionObject.getLocation().equalsIgnoreCase(oldInspectionObject.getLocation())){
-				oldInspectionObject.setLocation(updateInspectionObject.getLocation());
-			}
-    	} else {
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
-    	}
+    	InspectionObject oldInspectionObject = this.findById(id);
+    	
+		oldInspectionObject.setObjectName(updateInspectionObject.getObjectName());
+		oldInspectionObject.setCustomerName(updateInspectionObject.getCustomerName());
+		oldInspectionObject.setDescription(updateInspectionObject.getDescription());
+		oldInspectionObject.setLocation(updateInspectionObject.getLocation());
 		
 		inspectionObjectRepository.save(oldInspectionObject);
-    	return updateInspectionObject;
+    	return oldInspectionObject;
     }
 }
