@@ -27,7 +27,7 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	}
 	
 	@Test
-	public void executePrintAllInspectionObjects(){
+	public void executePrintAllInspectionObjects() throws InspectionObjectAccessException{
 		System.out.println("****** Should Show all the inspectionObjects in the database ******");
 		System.out.println("Show the 4 inspectionObjects and their data");
 		List<InspectionObject> inspectionObjectList = inspectionObjectService.findAll();
@@ -53,7 +53,7 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	}
 	
 	@Test
-	public void executeShowInspectionObjectByObjectName(){
+	public void executeShowInspectionObjectByObjectName() throws InspectionObjectAccessException{
 		System.out.println("****** Should show InspectionObject found by ObjectName ******");
 		InspectionObject inspectionObject = (InspectionObject) inspectionObjectService.findByObjectName("University of Mannheim");
 		

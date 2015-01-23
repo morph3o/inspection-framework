@@ -21,23 +21,11 @@ public class InspectionObjectController {
 	private InspectionObjectService inspectionObjectService;
 
 	@RequestMapping(method=RequestMethod.GET)
-    public Object getInspectionObjectsByCustomerName(@RequestParam(required=false, value="customerName") String customerName) throws InspectionObjectAccessException {
-		List<InspectionObject> inspectionObjectList;
-		
+    public List<InspectionObject> getInspectionObjectsByCustomerName(@RequestParam(required=false, value="customerName") String customerName) throws InspectionObjectAccessException {
 		if(customerName == null) {
-			inspectionObjectList = inspectionObjectService.findAll();
+			return inspectionObjectService.findAll();
 		} else {
-			inspectionObjectList = inspectionObjectService.findByCustomerName(customerName);
-		}
-		
-		if(inspectionObjectList.size() > 0){
-			return inspectionObjectList;
-		} else {
-			if(customerName == null){
-				throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
-			} else {
-				throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_CUSTOMERNAME_TEXT_ID,new String[]{customerName});
-			}
+			return inspectionObjectService.findByCustomerName(customerName);
 		}
     }
 	
@@ -47,16 +35,14 @@ public class InspectionObjectController {
 		return savedInspectionObject;
 	}
 	
-
-	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.DELETE)
 	public void deleteInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
 		inspectionObjectService.deleteInspectionObjectByID(inspectionObjectId);
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.GET)
-	public void getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
-		inspectionObjectService.findById(inspectionObjectId);
+	public InspectionObject getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
+		return inspectionObjectService.findById(inspectionObjectId);
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.PUT)

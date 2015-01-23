@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 
 import com.insframe.server.config.WebAppConfigurationAware;
+import com.insframe.server.error.AssignmentAccessException;
+import com.insframe.server.error.AssignmentCreationException;
+import com.insframe.server.error.InspectionObjectAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.InspectionObject;
@@ -36,7 +39,7 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 	private GridFsService gridFsService;
 	
 	@Before
-	public void init() throws FileNotFoundException{
+	public void init() throws FileNotFoundException, AssignmentCreationException, InspectionObjectAccessException{
 		assignmentService.deleteAll();
 		assignmentService.save(new Assignment("Check University of Mannheim", "Go to the university of Mannheim and perform the needed checks.", true));
 		
@@ -54,12 +57,12 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 		
 		InputStream is = new FileInputStream("bridge.jpg");
 		
-		bridgeAssignment.addAttachment(gridFsService.store(is, "bridge.jpg", "img/jpg", new FileMetaData("Ernst-Walz bridge Heidelberg")));
+		bridgeAssignment.addAttachment(gridFsService.store(is, "bridge.jpg", "image/jpeg", new FileMetaData("Ernst-Walz bridge Heidelberg")));
 		assignmentService.save(bridgeAssignment);
 	}
 	
 	@Test
-	public void executePrintAllAssignments(){
+	public void executePrintAllAssignments() throws AssignmentAccessException{
 		System.out.println("****** Should Show all the Assignments in the database ******");
 		System.out.println("Show the 2 Assignments and their data");
 		List<Assignment> AssignmentList = assignmentService.findAll();
