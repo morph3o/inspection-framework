@@ -117,6 +117,15 @@ public class Assignment {
 	public List<Task> getTasks() {
 		return tasks;
 	}
+	
+	public Task getTask(String id) {
+		for (Task task : tasks) {
+			if(task.getId().equals(id)){
+				return task;
+			}
+		}
+		return null;
+	}
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;

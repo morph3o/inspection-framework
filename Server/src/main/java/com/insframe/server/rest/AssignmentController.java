@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.insframe.server.error.AssignmentAccessException;
-import com.insframe.server.error.AssignmentCreationException;
+import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.FileUploadException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
@@ -36,7 +36,7 @@ public class AssignmentController {
     }
 	
 	@RequestMapping(method=RequestMethod.POST)
-	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentCreationException, AssignmentAccessException {
+	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException {
 		return assignmentService.createAssignment(assignment);
 	}
 	
@@ -83,10 +83,44 @@ public class AssignmentController {
 		}
 	}
 	
+	@RequestMapping(value="/{assignmentId}/task/{taskId}/attachment", method=RequestMethod.POST)
+	public void addAttachmentToTask(@PathVariable("assignmentId") String assignmentId,
+									@PathVariable("taskId") String taskId,
+									@RequestParam("fileUpload") List<MultipartFile> fileList,
+									@RequestParam(value = "fileDescription", required = false) List<String> descriptionList)
+								 throws AssignmentAccessException, IOException, FileUploadException{
+		if(descriptionList == null){
+			descriptionList = new ArrayList<String>();
+		}
+		for (int i = 0; i < fileList.size(); i++) {
+			MultipartFile multipartFile = fileList.get(i);
+			if (!multipartFile.isEmpty()) {
+	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or even malicious files!)
+	        	// as this is a student project, it is not the primary concern
+	        	// https://wiki.mozilla.org/WebAppSec/Secure_Coding_Guidelines#Uploads
+	        	// http://stackoverflow.com/questions/9354300/securing-file-upload
+				if(descriptionList.size() > i)
+					assignmentService.addAttachmentToTask(assignmentId, taskId, multipartFile.getInputStream(), multipartFile.getOriginalFilename(), multipartFile.getContentType(), new FileMetaData(descriptionList.get(i)));
+				else {
+					assignmentService.addAttachmentToTask(assignmentId, taskId, multipartFile.getInputStream(), multipartFile.getOriginalFilename(), multipartFile.getContentType(), new FileMetaData(""));
+				}
+	        } else {
+	        	throw new FileUploadException(FileUploadException.EMPTY_FILE_UPLOAD_TEXT_ID,new String[]{});
+	        }
+		}
+	}
+
 	@RequestMapping(value="/{assignmentId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
-	public void deleteAttachment(@PathVariable("assignmentId") String assignmentId,
-									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException {
+	public void deleteAssignmentAttachment(@PathVariable("assignmentId") String assignmentId,
+									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException {
 		assignmentService.deleteAttachment(assignmentId, attachmentId);
+	}
+	
+	@RequestMapping(value="/{assignmentId}/task/{taskId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
+	public void deleteTaskAttachment(@PathVariable("assignmentId") String assignmentId,
+									@PathVariable("taskId") String taskId,
+									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException {
+		assignmentService.deleteAttachment(assignmentId, taskId, attachmentId);
 	}
 	
 	@RequestMapping(value="/{assignmentId}/attachment", method=RequestMethod.DELETE)

@@ -1,5 +1,6 @@
 package com.insframe.server.error;
 
+@SuppressWarnings("serial")
 public class FileUploadException extends InspectionFrameworkBaseException {
 
 	public static final String EMPTY_FILE_UPLOAD_TEXT_ID = "error.empty.file.uploaded";

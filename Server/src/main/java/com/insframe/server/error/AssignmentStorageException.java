@@ -1,7 +1,7 @@
 package com.insframe.server.error;
 
 @SuppressWarnings("serial")
-public class AssignmentCreationException extends
+public class AssignmentStorageException extends
 		InspectionFrameworkBaseException {
 	
 	public static final String MISSING_MANDATORY_PARAMETER_TEXT_ID = "error.assignment.missing.mandatory.parameter";
@@ -12,7 +12,7 @@ public class AssignmentCreationException extends
 	public static final String DUPLICATE_KEY_NAME_ID = "error.assignment.duplicate.name_id";
 	public static final String DUPLICATE_KEY_NAME = "error.assignment.duplicate.name";
 
-	public AssignmentCreationException(String textId, String[] args) {
+	public AssignmentStorageException(String textId, String[] args) {
 		super(textId, args);
 	}
 }
