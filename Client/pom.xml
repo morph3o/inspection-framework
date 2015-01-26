@@ -30,8 +30,8 @@
                 <version>2.1.1</version>
                 <configuration>
                     <warName>${project.artifactId}-${project.version}</warName>
-                    <outputDirectory>${project.build.directory}/../../Server/target</outputDirectory>
-					<!-- <webResources>	
+                    <!--<outputDirectory>${project.build.directory}/../../Server/target</outputDirectory>
+					 <webResources>	
 			            <resource> -->
 			              	<!-- this is relative to the pom.xml directory -->
 			              	<!-- <directory>../Client/HTML5</directory>  -->

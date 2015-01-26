@@ -1,1 +1,2 @@
-web:    java $JAVA_OPTS -Dspring.profiles.active="prod" -jar Server/target/dependency/webapp-runner.jar --port $PORT Server/target/*.war
+rest:    java $JAVA_OPTS -Dspring.profiles.active="prod" -jar Server/target/dependency/webapp-runner.jar --port $PORT --path /rest Server/target/*.war
+web:    java $JAVA_OPTS -jar Client/target/dependency/webapp-runner.jar --port $PORT --path /web Client/target/*.war
