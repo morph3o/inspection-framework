@@ -13,13 +13,13 @@ import com.insframe.server.Application;
 
 @Configuration
 @ComponentScan(basePackageClasses = Application.class, excludeFilters = @Filter({Controller.class, Configuration.class}))
-@Profile("prod")
-class ApplicationConfig {
+@Profile("dev")
+class DevApplicationConfig {
 	
 	@Bean
 	public static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() {
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
-		ppc.setLocation(new ClassPathResource("/persistence.properties"));
+		ppc.setLocation(new ClassPathResource("/dev_persistence.properties"));
 		return ppc;
 	}
 }
