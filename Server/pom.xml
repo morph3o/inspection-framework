@@ -198,35 +198,8 @@
                 <version>2.1.1</version>
                 <configuration>
                     <warName>${project.artifactId}-${project.version}</warName>
-                   	<outputDirectory>${project.build.directory}/../../target</outputDirectory>
+                   	<!--  <outputDirectory>${project.build.directory}/../../target</outputDirectory> -->
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>sources</goal>
-                        </goals>
-                    </execution>
-					<execution>
-	                    <phase>package</phase>
-	                    <goals><goal>copy</goal></goals>
-	                    <configuration>
-	                        <artifactItems>
-	                            <artifactItem>
-	                                <groupId>com.github.jsimone</groupId>
-	                                <artifactId>webapp-runner</artifactId>
-	                                <version>7.0.57.1</version>
-	                                <destFileName>webapp-runner.jar</destFileName>
-	                            </artifactItem>
-	                        </artifactItems>
-	                    </configuration>
-                	</execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
