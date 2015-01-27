@@ -1,3 +1,13 @@
+var restBackendUrl = 'http://inspection-framework.herokuapp.com'
+var inspectionObjectRetriever = angular.module('inspectionObjectRetriever', []);
+
+inspectionObjectRetriever.controller('InspectionObjectListCtrl', function ($scope, $http) {
+  $http.get(restBackendUrl + '/inspectionobject').success(function(data) {
+	  $scope.inspectionObjects = data
+  })
+});
+
+
 (function(){
     var app = angular.module('store', []);
     
