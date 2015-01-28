@@ -6,7 +6,7 @@
       Search: <input ng-model="query">
       Sort by:
       <select ng-model="orderProp">
-        <option value="name">Alphabetical</option>
+        <option value="objectName">Alphabetical</option>
         <option value="age">Newest</option>
       </select>
 
@@ -14,10 +14,10 @@
     <div class="col-md-10">
       <!--Body content-->
 
-      <ul class="phones">
+      <ul>
         <li ng-repeat="inspectionObject in inspectionObjects | filter:query | orderBy:orderProp" class="thumbnail">
-          <a href="#/inspectionObjects/{{inspectionObject.id}}" class="thumb"><img ng-src="{{inspectionObject.imageUrl}}"></a>
-          <a href="#/inspectionObjects/{{inspectionObject.id}}">{{inspectionObject.name}}</a>
+          <a href="#/inspectionObjects/{{inspectionObject.id}}" class="thumb"><span>{{inspectionObject.objectName}}</span></a>
+          <p>{{inspectionObject.description}}</p>
         </li>
       </ul>
 

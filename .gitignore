@@ -2,3 +2,5 @@ target/
 Server/target/
 .settings
 .project
+*.iml
+.idea

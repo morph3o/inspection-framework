@@ -1,34 +1,20 @@
-var restBackendUrl = 'http://inspection-framework.herokuapp.com'
-var inspectionObjectRetriever = angular.module('inspectionObjectRetriever', []);
+var inspectionFrameworkApp = angular.module('inspectionFrameworkApp', [
+	                                                                 'ngRoute',
+	                                                                 'inspectionObjectControllers'
+	                                                               ]);
+inspectionFrameworkApp.config(['$routeProvider', '$locationProvider',
+		                    function($routeProvider, $locationProvider) {
+		                      $routeProvider.
+		                        when('/inspectionObjects', {
+		                          templateUrl: 'views/inspection-object-list.html',
+		                          controller: 'InspectionObjectListCtrl'
+		                        }).
+		                        when('/inspectionObjects/:inspectionObjectId', {
+		                          templateUrl: 'views/inspection-object-detail.html',
+		                          controller: 'InspectionObjectDetailCtrl'
+		                        }).
+		                        otherwise({
+		                          redirectTo: '/inspectionObjects'
+		                        });
+		                    }]);
 
-inspectionObjectRetriever.controller('InspectionObjectListCtrl', function ($scope, $http) {
-  $http.get(restBackendUrl + '/inspectionobject').success(function(data) {
-	  $scope.inspectionObjects = data
-  })
-});
-
-
-(function(){
-    var app = angular.module('store', []);
-    
-    app.controller('StoreController', function(){
-        this.products = gems;
-    });
-    
-    var gems = [
-        {
-            name: 'Dodecahedron',
-            price: 2.95,
-            description: '...',
-            canPurchase: true,
-            soldOut: false
-        },
-        {
-            name: 'Gem 2',
-            price: 4.95,
-            description: '...',
-            canPurchase: true,
-            soldOut: false
-        }
-    ];
-})();
