@@ -8,9 +8,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
 import com.insframe.server.account.UserSrv;
+import com.insframe.server.support.service.SimpleCORSFilter;
 
 @Configuration
 @EnableWebMvcSecurity
@@ -43,6 +45,7 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
         	.csrf().disable()
+        	.addFilterBefore(new SimpleCORSFilter(), ChannelProcessingFilter.class)
             .authorizeRequests()
                 .antMatchers("/", "/**", "/favicon.ico", "/resources/**", "/signup", "/user/", "/user/**", "/inspectionobject/", "/inspectionobject/**").permitAll()
                 .anyRequest().authenticated()

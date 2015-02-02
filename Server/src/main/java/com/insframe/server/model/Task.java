@@ -1,5 +1,6 @@
 package com.insframe.server.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -13,8 +14,8 @@ public class Task {
 	private String taskName;
 	private String description;
 	private Integer state;
-	private List<Task> attachments;
-	
+	private List<String> attachmentIds;
+
 	public Task() {
 		super();
 		this.setId(ObjectId.get().toString());
@@ -64,12 +65,19 @@ public class Task {
 	public void setId(String id) {
 		this.id = id;
 	}
-
-	public List<Task> getAttachments() {
-		return attachments;
+	
+	public List<String> getAttachmentIds() {
+		return attachmentIds;
 	}
 
-	public void setAttachments(List<Task> attachments) {
-		this.attachments = attachments;
+	public void setAttachmentIds(List<String> attachmentIds) {
+		this.attachmentIds = attachmentIds;
+	}
+	
+	public void addAttachment(String gridFsId) {
+		if(attachmentIds == null){
+			attachmentIds = new ArrayList<String>();
+		}
+		attachmentIds.add(gridFsId);
 	}
 }
