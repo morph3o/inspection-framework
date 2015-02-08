@@ -7,7 +7,11 @@ import org.bson.types.ObjectId;
 
 public class Task {
 	public static final Integer STATE_INITIAL = 0;
-	public static final Integer STATE_IN_PROGRESS = 1;
+	/**
+	 * Do we need an in progress status? because when a user starts a task he/she should finish it and not leave
+	 * tasks in progress.
+	 * */
+	public static final Integer STATE_IN_PROGRESS = 1; 
 	public static final Integer STATE_FINISHED = 2;
 	
 	private String id;

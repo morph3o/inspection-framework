@@ -1,11 +1,14 @@
 package com.insframe.server.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -29,7 +32,16 @@ import com.insframe.server.Application;
 @ComponentScan(basePackageClasses = Application.class, includeFilters = { @Filter(Controller.class),
 																		  @Filter(ControllerAdvice.class) }, useDefaultFilters = false)
 class WebMvcConfig extends WebMvcConfigurationSupport {
-
+	
+	@Value("${mail.config.host}")
+	private String MAIL_HOST;
+	@Value("${mail.config.port}")
+	private int MAIL_PORT;
+	@Value("${mail.config.username}")
+	private String MAIL_USERNAME;
+	@Value("${mail.config.password}")
+	private String MAIL_PASSWORD;
+	
     private static final String MESSAGE_SOURCE = "/WEB-INF/i18n/messages";
     private static final String VIEWS = "/WEB-INF/views/";
 
@@ -83,6 +95,20 @@ class WebMvcConfig extends WebMvcConfigurationSupport {
         CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
         multipartResolver.setMaxUploadSize(500000);
         return multipartResolver;
+    }
+    
+    @Bean
+    public JavaMailSender mailSender(){
+    	JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+    	mailSender.setHost(MAIL_HOST);
+    	mailSender.setPort(MAIL_PORT);
+    	mailSender.setUsername(MAIL_USERNAME);
+    	mailSender.setPassword(MAIL_PASSWORD);
+    	
+    	mailSender.getJavaMailProperties().put("mail.smtp.auth", true);
+    	mailSender.getJavaMailProperties().put("mail.smtp.starttls.enable", true);
+    	
+    	return mailSender;
     }
 
     @Override
