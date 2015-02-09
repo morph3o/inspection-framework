@@ -41,7 +41,7 @@ public class AssignmentController {
 	}
 	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.DELETE)
-	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
+	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException {
 		assignmentService.deleteAssignmentById(assignmentId);
 	}
 	
@@ -124,7 +124,7 @@ public class AssignmentController {
 	}
 	
 	@RequestMapping(value="/{assignmentId}/attachment", method=RequestMethod.DELETE)
-	public void deleteAllAttachments(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException{
+	public void deleteAllAttachments(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException{
 		assignmentService.deleteAllAttachments(assignmentId);
 	}
 }

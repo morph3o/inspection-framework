@@ -83,14 +83,16 @@ public class AssignmentService {
 		List<Task> tasks = queriedAssignment.getTasks();
 		for (int i = 0; i < tasks.size(); i++) {
 			if(tasks.get(i).getId().equalsIgnoreCase(taskId)) {
+				deleteAllAttachments(assignmentId, taskId);
 				tasks.remove(i);
 			}
 		}
 		save(queriedAssignment);
 	}
 	
-	public void deleteAssignmentById(String id) throws AssignmentAccessException{
+	public void deleteAssignmentById(String id) throws AssignmentAccessException, AssignmentStorageException{
 		findById(id);
+		deleteAllAttachments(id);
 		assignmentRepository.delete(id);
 	}
 
@@ -120,14 +122,24 @@ public class AssignmentService {
 		save(assignment);
 	}
 	
-	public void deleteAllAttachments(String assignmentId) throws AssignmentAccessException {
+	public void deleteAllAttachments(String assignmentId, String taskId) throws AssignmentAccessException, AssignmentStorageException {
+		Assignment assignment = findById(assignmentId);
+		List<String> attachmentIds = assignment.getTask(taskId).getAttachmentIds();
+		for (String assignedAttachmentId : attachmentIds) {
+			gridFsService.deleteById(assignedAttachmentId);
+		}
+		attachmentIds.clear();
+		save(assignment);
+	}
+	
+	public void deleteAllAttachments(String assignmentId) throws AssignmentAccessException, AssignmentStorageException {
 		Assignment assignment = findById(assignmentId);
 		List<String> attachmentIds = assignment.getAttachmentIds();
 		for (String attachmentId : attachmentIds) {
 			gridFsService.deleteById(attachmentId);
 		}
 		attachmentIds.clear();
-		assignmentRepository.save(assignment);
+		save(assignment);
 	}
 	
 	public Assignment save(Assignment assignment) throws AssignmentStorageException {
