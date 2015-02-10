@@ -19,7 +19,7 @@ class DevApplicationConfig {
 	@Bean
 	public static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer() {
 		PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
-		ppc.setLocation(new ClassPathResource("/dev_persistence.properties"));
+		ppc.setLocations(new ClassPathResource("/dev_persistence.properties"), new ClassPathResource("/mailsender.properties"));
 		return ppc;
 	}
 }

@@ -26,7 +26,7 @@ class MongoConfig {
 	@Value("${mongodb.host}")
 	private String host;
 	@Value("${mongodb.port}")
-	private int port;
+	private String port;
 	@Value("${mongodb.database}")
 	private String database;
 	@Value("${mongodb.username}")
@@ -36,7 +36,7 @@ class MongoConfig {
 
     @Bean
     public MongoDbFactory mongoDbFactory() throws UnknownHostException {
-        return new SimpleMongoDbFactory(new MongoClient(host, port), database, new UserCredentials(username, password));
+        return new SimpleMongoDbFactory(new MongoClient(host, Integer.parseInt(port)), database, new UserCredentials(username, password));
     }
 
     @Bean

@@ -21,12 +21,4 @@ public class MailService {
 		
 		mailSender.send(customMailMessage);
 	}
-	
-	public JavaMailSender getMailSender() {
-		return mailSender;
-	}
-
-	public void setMailSender(JavaMailSender mailSender) {
-		this.mailSender = mailSender;
-	}
 }

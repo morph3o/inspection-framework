@@ -17,6 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 @ContextConfiguration(classes = {
         ApplicationConfig.class,
         MongoConfig.class,
+        MailSenderConfig.class,
         NoCsrfSecurityConfig.class,
         WebMvcConfig.class
 })
