@@ -54,22 +54,22 @@ public class UserService {
     public User updateUser(User updatedUser){
     	User oldUser = userRepository.findByUserName(updatedUser.getUserName());
     	
-    	if(!updatedUser.getFirstName().equalsIgnoreCase(oldUser.getFirstName())){
+    	if(updatedUser.getFirstName() != null && !updatedUser.getFirstName().equalsIgnoreCase(oldUser.getFirstName())){
     		oldUser.setFirstName(updatedUser.getFirstName());
 		} 
-		if(!updatedUser.getLastName().equalsIgnoreCase(oldUser.getLastName())){
+		if(updatedUser.getLastName() != null && !updatedUser.getLastName().equalsIgnoreCase(oldUser.getLastName())){
 			oldUser.setLastName(updatedUser.getLastName());
 		}
-		if(!updatedUser.getEmailAddress().equalsIgnoreCase(oldUser.getEmailAddress())){
+		if(updatedUser.getEmailAddress() != null && !updatedUser.getEmailAddress().equalsIgnoreCase(oldUser.getEmailAddress())){
 			oldUser.setEmailAddress(updatedUser.getEmailAddress());
 		}
-		if(!updatedUser.getPhoneNumber().equalsIgnoreCase(oldUser.getPhoneNumber())){
+		if(updatedUser.getPhoneNumber() != null && !updatedUser.getPhoneNumber().equalsIgnoreCase(oldUser.getPhoneNumber())){
 			oldUser.setPhoneNumber(updatedUser.getPhoneNumber());
 		}
-		if(!updatedUser.getRole().equalsIgnoreCase(oldUser.getRole())){
+		if(updatedUser.getRole() != null && !updatedUser.getRole().equalsIgnoreCase(oldUser.getRole())){
 			oldUser.setRole(updatedUser.getRole());
 		}
-		if(!updatedUser.getPassword().equalsIgnoreCase(oldUser.getPassword())){
+		if(updatedUser.getPassword() != null && !updatedUser.getPassword().equalsIgnoreCase(oldUser.getPassword())){
 			oldUser.setPassword(updatedUser.getPassword());
 		}
 		

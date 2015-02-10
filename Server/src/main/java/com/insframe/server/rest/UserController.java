@@ -54,8 +54,9 @@ public class UserController {
 		return user;
 	}
 	
-	@RequestMapping( value=MODIFY_USER, method=RequestMethod.POST )
+	@RequestMapping( value=MODIFY_USER, method=RequestMethod.PUT )
 	public User modifyUser(@RequestBody User user){
+		System.out.println(user);
 		if(user != null){
 			return userService.updateUser(user);
 		} else {
