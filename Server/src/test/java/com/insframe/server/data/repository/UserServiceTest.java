@@ -49,6 +49,17 @@ public class UserServiceTest extends WebAppConfigurationAware{
 	}
 	
 	@Test
+	public void shouldDeleteUserByUserID(){
+		System.out.println("****** Should Delete User by Username ******");
+		String userId = userService.findByUserName("hcarns").getId();
+		System.out.println("Now the user with username : \'hcarns\' and userID: \'"+ userId +"\' will be deleted. ");
+		userService.deleteUserById(userId);
+		Assert.assertNull(userService.findById(userId));
+		System.out.println("User \'hcarns\' was deleted.");
+		System.out.println("****** End of Should Delete User by Username ******");
+	}
+	
+	@Test
 	public void shouldShowUserFindByUsername(){
 		System.out.println("****** Should Show User found by Username ******");
 		User user = (User) userService.findByUserName("fpetru");

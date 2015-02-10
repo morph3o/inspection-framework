@@ -21,6 +21,8 @@ public class UserController {
 	private static final String GET_ALL_USERS = "/user/users";
 	private static final String CREATE_USER = "/user/create";
 	private static final String MODIFY_USER = "/user/update";
+	private static final String DELETE_USER_BY_USERNAME = "/user/delete/byusername/{username}";
+	private static final String DELETE_USER_BY_USERID = "/user/delete/byuserid/{userID}";
 	
 	@Autowired
 	private UserService userService;
@@ -59,6 +61,16 @@ public class UserController {
 		} else {
 			return null;
 		}
+	}
+	
+	@RequestMapping( value=DELETE_USER_BY_USERNAME, method=RequestMethod.DELETE )
+	public void deleteUserByUsername(@PathVariable("username") String username){
+		userService.deleteUserByUserName(username);
+	}
+	
+	@RequestMapping( value=DELETE_USER_BY_USERID, method=RequestMethod.DELETE )
+	public void deleteUserByUserId(@PathVariable("userID") String userID){
+		userService.deleteUserById(userID);
 	}
 
 }

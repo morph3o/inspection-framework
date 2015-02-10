@@ -12,5 +12,6 @@ public interface UserRepository extends MongoRepository<User, String>{
     public List<User> findByLastName(String lastName);
     public User findByUserName(String username);
     
-    public Long deleteUserByUserName(String lastname);
+    public Long deleteUserByUserName(String username);
+    public Long deleteUserById(String id);
 }
