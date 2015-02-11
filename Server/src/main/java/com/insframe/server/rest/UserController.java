@@ -16,13 +16,19 @@ import com.insframe.server.service.UserService;
 @RestController
 public class UserController {
 	
-	private static final String GET_USER_BY_LASTNAME = "/user/bylastname/{lastName}";
-	private static final String GET_USER_BY_USERNAME = "/user/byusername/{userName}";
-	private static final String GET_ALL_USERS = "/user/users";
-	private static final String CREATE_USER = "/user/create";
-	private static final String MODIFY_USER = "/user/update";
-	private static final String DELETE_USER_BY_USERNAME = "/user/delete/byusername/{username}";
-	private static final String DELETE_USER_BY_USERID = "/user/delete/byuserid/{userID}";
+//	/users	GET	Retrieve a list of users
+//	/users	POST	Create a new user
+//	/users/{id}	GET	Get details for an existing user
+//	/users/{id}	PUT	Modify details of an existing user
+//	/users/{id}	DELETE	Delete details of an existing user
+	
+	private static final String GET_ALL_USERS = "/users";
+	private static final String GET_USER_BY_LASTNAME = "/users/bylastname/{lastName}";
+	private static final String GET_USER_BY_USERNAME = "/users/byusername/{userName}";
+	private static final String CREATE_USER = "/users";
+	private static final String MODIFY_USER = "/users/{userID}";
+	private static final String DELETE_USER_BY_USERID = "/users/{userID}";
+	private static final String DELETE_USER_BY_USERNAME = "/users/byusername/{username}";
 	
 	@Autowired
 	private UserService userService;
@@ -55,9 +61,9 @@ public class UserController {
 	}
 	
 	@RequestMapping( value=MODIFY_USER, method=RequestMethod.PUT )
-	public User modifyUser(@RequestBody User user){
+	public User modifyUser(@RequestBody User user, @PathVariable("userID") String userID){
 		System.out.println(user);
-		if(user != null){
+		if(user != null && userID != null && !userID.isEmpty()){
 			return userService.updateUser(user);
 		} else {
 			return null;
