@@ -31,7 +31,7 @@ class GeneralExceptionHandler {
 //	}
 	
 	@ExceptionHandler(value = Exception.class)
-	@ResponseStatus(value=HttpStatus.OK)
+	@ResponseStatus(value=HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public JSONErrorMessage exception(Exception exception, HttpServletRequest req) {
 		String errorMessage = exception.getMessage(); 
