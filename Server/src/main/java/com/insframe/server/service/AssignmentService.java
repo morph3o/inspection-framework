@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Repository;
@@ -167,6 +168,11 @@ public class AssignmentService {
 			}
 		}	
 		try {
+			for (Task task : assignment.getTasks()) {
+				if(task.getId() == null) {
+					task.setId(ObjectId.get().toString());
+				}
+			}
 			return assignmentRepository.save(assignment);	
 		} catch (Exception e) {
 			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
