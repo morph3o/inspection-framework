@@ -24,13 +24,12 @@ public class Task {
 		super();
 	}
 	
-	public Task(String id, String taskName, String description, Integer state) {
-		this.id = id;
+	public Task(String taskName, String description, Integer state) {
 		this.taskName = taskName;
 		this.description = description;
 		this.state = state;
 	}
-
+	
 	@Override
 	public String toString(){
 		return "InspectionObject [taskId =" + id + ", taskName=" + taskName + ", description="
