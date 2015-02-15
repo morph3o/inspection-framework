@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.insframe.server.config.WebAppConfigurationAware;
 import com.insframe.server.error.InspectionObjectAccessException;
+import com.insframe.server.error.InspectionObjectStorageException;
 import com.insframe.server.model.InspectionObject;
 import com.insframe.server.service.InspectionObjectService;
 
@@ -18,7 +19,7 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	private InspectionObjectService inspectionObjectService;
 	
 	@Before
-	public void init(){
+	public void init() throws InspectionObjectStorageException{
 		inspectionObjectService.deleteAll();
 		inspectionObjectService.save(new InspectionObject("University of Mannheim", "The university of Mannheim", "Mannheim", "Studentenwerk Mannheim"));
 		inspectionObjectService.save(new InspectionObject("Montpellier bridge", "Montpellier bridge in Heidelberg", "Heidelberg", "City of Heidelberg"));
@@ -68,7 +69,7 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	}
 	
 	@Test
-	public void executeUpdateInspectionObject() throws InspectionObjectAccessException{
+	public void executeUpdateInspectionObject() throws InspectionObjectAccessException, InspectionObjectStorageException{
 		System.out.println("****** execute update InspectionObject ******");
 		InspectionObject inspectionObject = inspectionObjectService.findByObjectName("University of Mannheim");
 		System.out.println(inspectionObject);

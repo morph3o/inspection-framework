@@ -69,7 +69,7 @@ public class AssignmentController {
 		for (int i = 0; i < fileList.size(); i++) {
 			MultipartFile multipartFile = fileList.get(i);
 			if (!multipartFile.isEmpty()) {
-	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or even malicious files!)
+	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or malicious files!)
 	        	// as this is a student project, it is not the primary concern
 	        	// https://wiki.mozilla.org/WebAppSec/Secure_Coding_Guidelines#Uploads
 	        	// http://stackoverflow.com/questions/9354300/securing-file-upload
@@ -96,7 +96,7 @@ public class AssignmentController {
 		for (int i = 0; i < fileList.size(); i++) {
 			MultipartFile multipartFile = fileList.get(i);
 			if (!multipartFile.isEmpty()) {
-	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or even malicious files!)
+	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or malicious files!)
 	        	// as this is a student project, it is not the primary concern
 	        	// https://wiki.mozilla.org/WebAppSec/Secure_Coding_Guidelines#Uploads
 	        	// http://stackoverflow.com/questions/9354300/securing-file-upload
@@ -125,7 +125,7 @@ public class AssignmentController {
 	}
 	
 	@RequestMapping(value="/{assignmentId}/attachment", method=RequestMethod.DELETE)
-	public void deleteAllAttachments(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException{
+	public void deleteAllAttachments(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException{
 		assignmentService.deleteAllAttachments(assignmentId);
 	}
 }

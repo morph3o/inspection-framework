@@ -85,6 +85,7 @@ public class AssignmentService {
 		List<Task> tasks = queriedAssignment.getTasks();
 		for (int i = 0; i < tasks.size(); i++) {
 			if(tasks.get(i).getId().equalsIgnoreCase(taskId)) {
+				gridFsService.deleteFileList(tasks.get(i).getAttachmentIds());
 				tasks.remove(i);
 			}
 		}
@@ -92,7 +93,8 @@ public class AssignmentService {
 	}
 	
 	public void deleteAssignmentById(String id) throws AssignmentAccessException{
-		findById(id);
+		Assignment queriedAssignment = findById(id);
+		gridFsService.deleteFileList(queriedAssignment.getAttachmentIds());
 		assignmentRepository.delete(id);
 	}
 
@@ -103,8 +105,10 @@ public class AssignmentService {
 	public void deleteAttachment(String assignmentId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
 		List<String> attachmentIds = assignment.getAttachmentIds();
-		for (String assignedAttachmentId : attachmentIds) {
+		for (int i = 0; i < attachmentIds.size(); i++) {
+			String assignedAttachmentId = attachmentIds.get(i);
 			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
+				gridFsService.deleteById(assignedAttachmentId);
 				attachmentIds.remove(assignedAttachmentId);
 			}
 		}
@@ -114,28 +118,43 @@ public class AssignmentService {
 	public void deleteAttachment(String assignmentId, String taskId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
 		List<String> attachmentIds = assignment.getTask(taskId).getAttachmentIds();
-		for (String assignedAttachmentId : attachmentIds) {
+		for (int i = 0; i < attachmentIds.size(); i++) {
+			String assignedAttachmentId = attachmentIds.get(i);
 			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
+				gridFsService.deleteById(assignedAttachmentId);
 				attachmentIds.remove(assignedAttachmentId);
 			}
 		}
 		save(assignment);
 	}
 	
-	public void deleteAllAttachments(String assignmentId) throws AssignmentAccessException {
+	public void deleteAllAttachments(String assignmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
 		List<String> attachmentIds = assignment.getAttachmentIds();
-		for (String attachmentId : attachmentIds) {
-			gridFsService.deleteById(attachmentId);
-		}
+		gridFsService.deleteFileList(attachmentIds);
 		attachmentIds.clear();
-		assignmentRepository.save(assignment);
+		save(assignment);
+	}
+	
+	public void deleteAllAttachments(String assignmentId, String taskId) throws AssignmentAccessException {
+		Assignment queriedAssignment = findById(assignmentId);
+		List<Task> tasks = queriedAssignment.getTasks();
+		List<String> attachmentIds = null;
+		
+		for (int i = 0; i < tasks.size(); i++) {
+			if(tasks.get(i).getId().equalsIgnoreCase(taskId)) {
+				attachmentIds = tasks.get(i).getAttachmentIds();
+			}
+		}
+		gridFsService.deleteFileList(attachmentIds);
+		attachmentIds.clear();
+		assignmentRepository.save(queriedAssignment);
 	}
 	
 	public Assignment save(Assignment assignment) throws AssignmentStorageException, UserAccessException {
 		if(assignment.getAssignmentName() == null
 			|| assignment.getIsTemplate() == null) {
-			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{});
+			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"assignmentName and isTemplate"});
 		}
 		
 		if(assignment.getIsTemplate() == false) {
@@ -148,7 +167,7 @@ public class AssignmentService {
 			if(assignment.getAttachmentIds() == null) {
 				assignment.setAttachmentIds(new ArrayList<String>());
 			}
-			if(checkAttachmentsExist(assignment) == false) {
+			if(gridFsService.checkAttachmentsExist(assignment.getAttachmentIds()) == false) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
 			}
 		} else {
@@ -187,9 +206,7 @@ public class AssignmentService {
 			} else {
 				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME_ID,new String[]{assignment.getId(), assignment.getAssignmentName()});
 			}
-			
 		}
-		
 	}
 	
 	public Assignment createAssignment(Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
@@ -238,16 +255,5 @@ public class AssignmentService {
     	} else {
     		return false;
     	}
-    }
-    
-    private boolean checkAttachmentsExist(Assignment assignment) {
-    	if(assignment.getAttachmentIds() != null) {
-    		for(String attachmentId : assignment.getAttachmentIds()) {
-    			if(gridFsService.findById(attachmentId) == null) {
-    				return false;
-    			}
-    		}
-    	}
-    	return true;
     }
 }

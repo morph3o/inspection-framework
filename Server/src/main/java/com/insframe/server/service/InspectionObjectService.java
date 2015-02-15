@@ -1,5 +1,7 @@
 package com.insframe.server.service;
 
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +9,13 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.InspectionObjectRepository;
+import com.insframe.server.error.AssignmentAccessException;
+import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.InspectionObjectAccessException;
+import com.insframe.server.error.InspectionObjectStorageException;
+import com.insframe.server.error.UserAccessException;
+import com.insframe.server.model.Assignment;
+import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.InspectionObject;
 
 @Repository
@@ -15,11 +23,34 @@ public class InspectionObjectService {
 
 	@Autowired
 	private InspectionObjectRepository inspectionObjectRepository;
+	@Autowired
+	GridFsService gridFsService;
 	@Autowired	
 	private MongoOperations mongoOpts;
 	
-	public InspectionObject save(InspectionObject inspectionObject) {
-		return inspectionObjectRepository.save(inspectionObject);
+	public InspectionObject save(InspectionObject inspectionObject) throws InspectionObjectStorageException {
+		if(inspectionObject.getObjectName() == null
+				|| inspectionObject.getObjectName() == "") {
+				throw new InspectionObjectStorageException(InspectionObjectStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"objectName"});
+		}
+		
+		if(inspectionObject.getAttachmentIds() == null) {
+			inspectionObject.setAttachmentIds(new ArrayList<String>());
+		}
+		if(gridFsService.checkAttachmentsExist(inspectionObject.getAttachmentIds()) == false) {
+			throw new InspectionObjectStorageException(InspectionObjectStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
+		}
+		
+		try {
+			return inspectionObjectRepository.save(inspectionObject);
+		} catch (Exception e) {
+			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
+			if(inspectionObject.getId() == null) {
+				throw new InspectionObjectStorageException(InspectionObjectStorageException.DUPLICATE_KEY_NAME,new String[]{inspectionObject.getObjectName()});
+			} else {
+				throw new InspectionObjectStorageException(InspectionObjectStorageException.DUPLICATE_KEY_NAME_ID,new String[]{inspectionObject.getId(), inspectionObject.getObjectName()});
+			}
+		}
 	}
 	
 	@SuppressWarnings("null")
@@ -52,11 +83,13 @@ public class InspectionObjectService {
 	}
 	
     public void deleteAll(){
+    	// TODO: make sure that also the attachments are deleted!
     	inspectionObjectRepository.deleteAll();
     }
     
     public void deleteInspectionObjectByID(String id) throws InspectionObjectAccessException{
-    	this.findById(id);
+    	InspectionObject inspectionObject = this.findById(id);
+    	gridFsService.deleteFileList(inspectionObject.getAttachmentIds());
     	inspectionObjectRepository.delete(id);
     }
     
@@ -69,7 +102,7 @@ public class InspectionObjectService {
     	}
     }
     
-    public InspectionObject updateById(String id, InspectionObject updateInspectionObject) throws InspectionObjectAccessException {
+    public InspectionObject updateById(String id, InspectionObject updateInspectionObject) throws InspectionObjectAccessException, InspectionObjectStorageException {
     	InspectionObject oldInspectionObject = this.findById(id);
     	
 		oldInspectionObject.setObjectName(updateInspectionObject.getObjectName());
@@ -77,7 +110,26 @@ public class InspectionObjectService {
 		oldInspectionObject.setDescription(updateInspectionObject.getDescription());
 		oldInspectionObject.setLocation(updateInspectionObject.getLocation());
 		
-		inspectionObjectRepository.save(oldInspectionObject);
+		this.save(oldInspectionObject);
     	return oldInspectionObject;
     }
+    
+    public void addAttachmentToInspectionObject(String inspectionObjectId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws InspectionObjectAccessException, InspectionObjectStorageException {
+		InspectionObject inspectionObject = findById(inspectionObjectId);
+		inspectionObject.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
+		this.save(inspectionObject);
+	}
+    
+	public void deleteAttachment(String inspectionObjectId, String attachmentId) throws InspectionObjectAccessException, InspectionObjectStorageException {
+		InspectionObject inspectionObject = findById(inspectionObjectId);
+		List<String> attachmentIds = inspectionObject.getAttachmentIds();
+		for (int i = 0; i < attachmentIds.size(); i++) {
+			String assignedAttachmentId = attachmentIds.get(i);
+			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
+				gridFsService.deleteById(assignedAttachmentId);
+				attachmentIds.remove(assignedAttachmentId);
+			}
+		}
+		save(inspectionObject);
+	}
 }
