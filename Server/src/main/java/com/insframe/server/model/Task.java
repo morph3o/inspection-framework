@@ -22,16 +22,14 @@ public class Task {
 
 	public Task() {
 		super();
-		this.setId(ObjectId.get().toString());
 	}
 	
 	public Task(String taskName, String description, Integer state) {
-		this.setId(ObjectId.get().toString());
 		this.taskName = taskName;
 		this.description = description;
 		this.state = state;
 	}
-
+	
 	@Override
 	public String toString(){
 		return "InspectionObject [taskId =" + id + ", taskName=" + taskName + ", description="
