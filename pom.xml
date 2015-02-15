@@ -9,6 +9,5 @@
   <packaging>pom</packaging>
   <modules>
     <module>Server</module>
-    <module>Client</module>
   </modules>
 </project>
