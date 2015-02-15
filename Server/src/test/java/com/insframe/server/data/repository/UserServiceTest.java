@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.insframe.server.config.WebAppConfigurationAware;
+import com.insframe.server.error.UserAccessException;
+import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.User;
 import com.insframe.server.service.UserService;
 
@@ -17,7 +19,7 @@ public class UserServiceTest extends WebAppConfigurationAware{
 	private UserService userService;
 	
 	@Before
-	public void init(){
+	public void init() throws UserStorageException{
 		userService.deleteAll();
 		
 		userService.save(new User("fpetru", "fpetru@gmail.com", "pass1", "ROLE_ADMIN", "Petrus", "Frank", "+49162123456", "+49162123456"));
@@ -38,8 +40,8 @@ public class UserServiceTest extends WebAppConfigurationAware{
 		System.out.println("****** End of Should Show All the Users in the database ******");
 	}
 	
-	@Test
-	public void shouldDeleteUserByUsername(){
+	@Test(expected=UserAccessException.class)
+	public void shouldDeleteUserByUsername() throws UserAccessException{
 		System.out.println("****** Should Delete User by Username ******");
 		System.out.println("Now the user with username : \'hcarns\' will be deleted. ");
 		userService.deleteUserByUserName("hcarns");
@@ -48,8 +50,8 @@ public class UserServiceTest extends WebAppConfigurationAware{
 		System.out.println("****** End of Should Delete User by Username ******");
 	}
 	
-	@Test
-	public void shouldDeleteUserByUserID(){
+	@Test(expected=UserAccessException.class)
+	public void shouldDeleteUserByUserID() throws UserAccessException{
 		System.out.println("****** Should Delete User by Username ******");
 		String userId = userService.findByUserName("hcarns").getId();
 		System.out.println("Now the user with username : \'hcarns\' and userID: \'"+ userId +"\' will be deleted. ");
@@ -60,7 +62,7 @@ public class UserServiceTest extends WebAppConfigurationAware{
 	}
 	
 	@Test
-	public void shouldShowUserFindByUsername(){
+	public void shouldShowUserFindByUsername() throws UserAccessException{
 		System.out.println("****** Should Show User found by Username ******");
 		User user = (User) userService.findByUserName("fpetru");
 		
@@ -79,7 +81,7 @@ public class UserServiceTest extends WebAppConfigurationAware{
 	}
 	
 	@Test
-	public void shouldCreateUser(){
+	public void shouldCreateUser() throws UserStorageException, UserAccessException{
 		System.out.println("****** Should Create new User ******");
 		
 		User newUser = new User();
@@ -113,17 +115,39 @@ public class UserServiceTest extends WebAppConfigurationAware{
 	}
 	
 	@Test
-	public void shouldModifyUser(){
+	public void shouldModifyUser() throws UserAccessException, UserStorageException{
 		System.out.println("****** Should Modify User ******");
 		User user = userService.findByUserName("ppilgrim");
 		System.out.println(user);
 		System.out.println("The email address will be modified from ppilgrim@gmail.com to newEmailAddress@gmail.com");
 		user.setEmailAddress("newEmailAddress@gmail.com");
-		userService.save(user);
+		userService.updateUser(user, user.getId());
 		User newUser = userService.findByUserName("ppilgrim");
 		System.out.println(newUser);
 		Assert.assertEquals("newEmailAddress@gmail.com", newUser.getEmailAddress());
 		System.out.println("****** End of Should Modify User ******");
+	}
+	
+	@Test(expected=UserAccessException.class)
+	public void shouldThrowExceptionByUsernameNotFound() throws UserAccessException{
+		System.out.println("****** Should throw an exception by Username not found ******");
+		userService.findByUserName("asdasdasdasd");
+		System.out.println("****** End Should throw an exception by Username not found ******");
+	}
+	
+	@Test(expected=UserAccessException.class)
+	public void shouldThrowExceptionByIDNotFound() throws UserAccessException{
+		System.out.println("****** Should throw an exception by ID not found ******");
+		userService.findById("asdasdasd");
+		System.out.println("****** End Should throw an exception by ID not found ******");
+	}
+	
+	@Test(expected=UserStorageException.class)
+	public void shouldThrowExceptionByInvalidEmail() throws UserStorageException{
+		System.out.println("****** Should throw an exception by ID not found ******");
+		User user = new User("userTest", "emailInvalid", "pass", "role", "lastname", "firstname", "phone", "mobile");
+		userService.save(user);
+		System.out.println("****** End Should throw an exception by ID not found ******");
 	}
 	
 //	private boolean hasAuthority(User user, String role) {

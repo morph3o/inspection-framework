@@ -17,6 +17,8 @@ import com.insframe.server.config.WebAppConfigurationAware;
 import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.InspectionObjectAccessException;
+import com.insframe.server.error.UserAccessException;
+import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.InspectionObject;
@@ -39,7 +41,7 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 	private GridFsService gridFsService;
 	
 	@Before
-	public void init() throws FileNotFoundException, AssignmentStorageException, InspectionObjectAccessException{
+	public void init() throws FileNotFoundException, AssignmentStorageException, InspectionObjectAccessException, UserAccessException, UserStorageException{
 		assignmentService.deleteAll();
 		assignmentService.save(new Assignment("Check University of Mannheim", "Go to the university of Mannheim and perform the needed checks.", true));
 		

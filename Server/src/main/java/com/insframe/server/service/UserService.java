@@ -7,7 +7,10 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.UserRepository;
+import com.insframe.server.error.UserAccessException;
+import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.User;
+import com.insframe.server.tools.INFRATools;
 
 @Repository
 public class UserService {
@@ -17,29 +20,58 @@ public class UserService {
 	@Autowired
 	private MongoOperations mongoOpts;
 	
-	public User findById(String id){
+	public User findById(String id) throws UserAccessException{
+		if(!userRepository.exists(id)) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, new String[]{id});
 		return userRepository.findById(id);
 	}
 	public User findByFirstName(String firstName){
 		return userRepository.findByFirstName(firstName);
 	}
-    public List<User> findByLastName(String lastName){
+    public List<User> findByLastName(String lastName) throws UserAccessException{
+    	if(userRepository.findByUserName(lastName) == null) throw new UserAccessException(UserAccessException.LASTNAME_NOT_FOUND, new String[]{lastName});
     	return userRepository.findByLastName(lastName);
     }
  
-    public User findByUserName(String username){
+    public User findByUserName(String username) throws UserAccessException{
+    	if(userRepository.findByUserName(username) == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, new String[]{username});
     	return userRepository.findByUserName(username);
     }
     
-    public Long deleteUserByUserName(String username){
+    public Long deleteUserByUserName(String username) throws UserAccessException{
+    	if(userRepository.findByUserName(username) == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, new String[]{username});
     	return userRepository.deleteUserByUserName(username);
     }
     
-    public Long deleteUserById(String id){
+    public Long deleteUserById(String id) throws UserAccessException{
+    	if(userRepository.findById(id) == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, new String[]{id}); 
     	return userRepository.deleteUserById(id);
     }
     
-    public void save(User user){
+    public void save(User user) throws UserStorageException{
+    	// User validation
+    	if(user.getUserName() == null || user.getUserName().isEmpty()){
+    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_USERNAME, new String[]{});
+    	} else {
+    		if(userRepository.findByUserName(user.getUserName()) != null){
+    			throw new UserStorageException(UserStorageException.DUPLICATE_USERNAME, new String[]{user.getUserName()});
+    		}
+    	}
+//    	if(user.getPassword() == null || user.getPassword().isEmpty()){
+//    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_PASSWORD, new String[]{});
+//    	}
+    	if(user.getEmailAddress() == null || user.getEmailAddress().isEmpty()){
+    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_EMAIL, new String[]{});
+    	} else {
+    		if(!INFRATools.isValidEmail(user.getEmailAddress())) throw new UserStorageException(UserStorageException.INVALID_PARAMETER_EMAIL, new String[]{user.getEmailAddress()});
+    	}
+//    	else{
+//    		if(user.getEmailAddress().equalsIgnoreCase(userRepository.findByUserName(user.getUserName()).getEmailAddress())){
+//    			throw new UserStorageException(UserStorageException.DUPLICATE_EMAIL, new String[]{user.getEmailAddress()});
+//    		}
+//    	}
+    	if(user.getRole() == null || user.getRole().isEmpty()){
+    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_ROLE, new String[]{});
+    	}
     	userRepository.save(user);
     }
     
@@ -51,8 +83,9 @@ public class UserService {
     	return userRepository.findAll();
     }
     
-    public User updateUser(User updatedUser){
-    	User oldUser = userRepository.findByUserName(updatedUser.getUserName());
+    public User updateUser(User updatedUser, String userid) throws UserAccessException{
+    	User oldUser = userRepository.findById(userid);
+    	if(oldUser == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, new String[]{updatedUser.getId()});
     	
     	if(updatedUser.getFirstName() != null && !updatedUser.getFirstName().equalsIgnoreCase(oldUser.getFirstName())){
     		oldUser.setFirstName(updatedUser.getFirstName());

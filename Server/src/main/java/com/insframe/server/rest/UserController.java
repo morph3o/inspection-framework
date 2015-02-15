@@ -10,19 +10,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.insframe.server.error.JSONErrorMessage;
+import com.insframe.server.error.UserAccessException;
+import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.User;
 import com.insframe.server.service.UserService;
 
 @RestController
 public class UserController {
 	
-//	/users	GET	Retrieve a list of users
-//	/users	POST	Create a new user
-//	/users/{id}	GET	Get details for an existing user
-//	/users/{id}	PUT	Modify details of an existing user
-//	/users/{id}	DELETE	Delete details of an existing user
-	
 	private static final String GET_ALL_USERS = "/users";
+	private static final String GET_USER_BY_ID = "/users/{userID}";
 	private static final String GET_USER_BY_LASTNAME = "/users/bylastname/{lastName}";
 	private static final String GET_USER_BY_USERNAME = "/users/byusername/{userName}";
 	private static final String CREATE_USER = "/users";
@@ -33,17 +30,18 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	
+	@RequestMapping( value=GET_USER_BY_ID, method=RequestMethod.GET )
+    public Object getUserByID(@PathVariable("userID") String userID) throws UserAccessException {
+		return (User) userService.findById(userID);
+    }
+	
 	@RequestMapping( value=GET_USER_BY_LASTNAME, method=RequestMethod.GET )
-    public Object getFirstUserFoundByLastName(@PathVariable("lastName") String lastName) {
-		if(userService.findByLastName(lastName).size() > 0){
-			return (User) userService.findByLastName(lastName).get(0);
-		} else {
-			return new JSONErrorMessage("There is no user with last name: "+lastName);
-		}
+    public Object getFirstUserFoundByLastName(@PathVariable("lastName") String lastName) throws UserAccessException {
+		return (User) userService.findByLastName(lastName).get(0);
     }
 	
 	@RequestMapping( value=GET_USER_BY_USERNAME, method=RequestMethod.GET )
-    public User getUserByUserName(@PathVariable("userName") String userName) {
+    public User getUserByUserName(@PathVariable("userName") String userName) throws UserAccessException {
 		User user = userService.findByUserName(userName);
 		return user;
     }
@@ -55,28 +53,23 @@ public class UserController {
 	}
 	
 	@RequestMapping( value=CREATE_USER, method=RequestMethod.POST )
-	public User insertUser(@RequestBody User user){
+	public User insertUser(@RequestBody User user) throws UserStorageException{
 		userService.save(user);
 		return user;
 	}
 	
 	@RequestMapping( value=MODIFY_USER, method=RequestMethod.PUT )
-	public User modifyUser(@RequestBody User user, @PathVariable("userID") String userID){
-		System.out.println(user);
-		if(user != null && userID != null && !userID.isEmpty()){
-			return userService.updateUser(user);
-		} else {
-			return null;
-		}
+	public User modifyUser(@RequestBody User user, @PathVariable("userID") String userID) throws UserAccessException{
+		return userService.updateUser(user, userID);
 	}
 	
 	@RequestMapping( value=DELETE_USER_BY_USERNAME, method=RequestMethod.DELETE )
-	public void deleteUserByUsername(@PathVariable("username") String username){
+	public void deleteUserByUsername(@PathVariable("username") String username) throws UserAccessException{
 		userService.deleteUserByUserName(username);
 	}
 	
 	@RequestMapping( value=DELETE_USER_BY_USERID, method=RequestMethod.DELETE )
-	public void deleteUserByUserId(@PathVariable("userID") String userID){
+	public void deleteUserByUserId(@PathVariable("userID") String userID) throws UserAccessException{
 		userService.deleteUserById(userID);
 	}
 

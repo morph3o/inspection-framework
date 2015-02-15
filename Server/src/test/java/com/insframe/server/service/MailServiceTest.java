@@ -14,7 +14,7 @@ public class MailServiceTest extends WebAppConfigurationAware{
 	public void shouldSendEmail(){
 		System.out.println("****** Should send an email to someEmail@someDomain.com ******");
 		String from = "test@testing.com";
-		String to = "someemail@somedomain.com";
+		String to = "morph3o@icloud.com";
 		String subject = "Testing email feature of inspection framework";
 		String message = "This email is for testing the sending email feature of inspection framework.";
 		mailService.sendEmail(from, to, subject, message);
