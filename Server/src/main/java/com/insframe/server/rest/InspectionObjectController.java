@@ -49,6 +49,7 @@ public class InspectionObjectController {
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.PUT)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void updateInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId,
 										 	@RequestBody InspectionObject inspectionObject) throws InspectionObjectAccessException {
 		inspectionObjectService.updateById(inspectionObjectId, inspectionObject);

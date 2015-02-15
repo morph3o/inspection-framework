@@ -166,13 +166,18 @@ public class AssignmentService {
 			if (assignment.getAttachmentIds() != null) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
 			}
-		}	
-		try {
+		}
+		if(assignment.getTasks() == null) {
+			assignment.setTasks(new ArrayList<Task>());
+		} else {
 			for (Task task : assignment.getTasks()) {
 				if(task.getId() == null) {
 					task.setId(ObjectId.get().toString());
 				}
 			}
+		}
+
+		try {
 			return assignmentRepository.save(assignment);	
 		} catch (Exception e) {
 			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
