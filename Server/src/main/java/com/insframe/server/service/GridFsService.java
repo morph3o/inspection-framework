@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.GridFsRepository;
+import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
 import com.mongodb.gridfs.GridFSDBFile;
 
@@ -41,5 +42,24 @@ public class GridFsService implements GridFsRepository {
 
 	public List<GridFSDBFile> findAll() {
 		return gridFsTemplate.find(null);
+	}
+	
+    public boolean checkAttachmentsExist(List<String> attachmentIds) {
+    	if(attachmentIds != null) {
+    		for(String attachmentId : attachmentIds) {
+    			if(this.findById(attachmentId) == null) {
+    				return false;
+    			}
+    		}
+    	}
+    	return true;
+    }
+    
+	public void deleteFileList(List<String> fileIds) {
+		if(fileIds != null) {
+			for (String attachmentId : fileIds) {
+				this.deleteById(attachmentId);
+			}
+		}
 	}
 }
