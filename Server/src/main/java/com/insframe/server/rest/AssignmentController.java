@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.FileUploadException;
+import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.service.AssignmentService;
@@ -36,7 +37,7 @@ public class AssignmentController {
     }
 	
 	@RequestMapping(method=RequestMethod.POST)
-	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException {
+	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
 		return assignmentService.createAssignment(assignment);
 	}
 	
@@ -112,14 +113,14 @@ public class AssignmentController {
 
 	@RequestMapping(value="/{assignmentId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
 	public void deleteAssignmentAttachment(@PathVariable("assignmentId") String assignmentId,
-									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException {
+									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		assignmentService.deleteAttachment(assignmentId, attachmentId);
 	}
 	
 	@RequestMapping(value="/{assignmentId}/task/{taskId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
 	public void deleteTaskAttachment(@PathVariable("assignmentId") String assignmentId,
 									@PathVariable("taskId") String taskId,
-									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException {
+									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		assignmentService.deleteAttachment(assignmentId, taskId, attachmentId);
 	}
 	

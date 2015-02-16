@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Repository;
@@ -12,6 +13,7 @@ import com.insframe.server.data.repository.AssignmentRepository;
 import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.InspectionObjectAccessException;
+import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.Task;
@@ -48,7 +50,7 @@ public class AssignmentService {
 		
     }
     
-    public void addTaskToAssignment(String assignmentId, Task task) throws AssignmentAccessException, AssignmentStorageException {
+    public void addTaskToAssignment(String assignmentId, Task task) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
     	Assignment assignment = findById(assignmentId);
     	assignment.getTasks().add(task);
     	save(assignment);
@@ -78,7 +80,7 @@ public class AssignmentService {
 		return queriedAssignment;
 	}
 	
-	public void deleteTaskById(String assignmentId, String taskId) throws AssignmentAccessException, AssignmentStorageException {
+	public void deleteTaskById(String assignmentId, String taskId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment queriedAssignment = findById(assignmentId);
 		List<Task> tasks = queriedAssignment.getTasks();
 		for (int i = 0; i < tasks.size(); i++) {
@@ -100,7 +102,7 @@ public class AssignmentService {
 		assignmentRepository.deleteAll();
 	}
 
-	public void deleteAttachment(String assignmentId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException {
+	public void deleteAttachment(String assignmentId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
 		List<String> attachmentIds = assignment.getAttachmentIds();
 		for (String assignedAttachmentId : attachmentIds) {
@@ -111,7 +113,7 @@ public class AssignmentService {
 		save(assignment);
 	}
 	
-	public void deleteAttachment(String assignmentId, String taskId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException {
+	public void deleteAttachment(String assignmentId, String taskId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
 		List<String> attachmentIds = assignment.getTask(taskId).getAttachmentIds();
 		for (String assignedAttachmentId : attachmentIds) {
@@ -142,7 +144,7 @@ public class AssignmentService {
 		save(assignment);
 	}
 	
-	public Assignment save(Assignment assignment) throws AssignmentStorageException {
+	public Assignment save(Assignment assignment) throws AssignmentStorageException, UserAccessException {
 		if(assignment.getAssignmentName() == null
 			|| assignment.getIsTemplate() == null) {
 			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{});
@@ -177,7 +179,17 @@ public class AssignmentService {
 			if (assignment.getAttachmentIds() != null) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
 			}
-		}	
+		}
+		if(assignment.getTasks() == null) {
+			assignment.setTasks(new ArrayList<Task>());
+		} else {
+			for (Task task : assignment.getTasks()) {
+				if(task.getId() == null) {
+					task.setId(ObjectId.get().toString());
+				}
+			}
+		}
+
 		try {
 			return assignmentRepository.save(assignment);	
 		} catch (Exception e) {
@@ -192,7 +204,7 @@ public class AssignmentService {
 		
 	}
 	
-	public Assignment createAssignment(Assignment assignment) throws AssignmentStorageException, AssignmentAccessException {
+	public Assignment createAssignment(Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
 		if(assignment.getId() == null) {
 			return save(assignment);
 		} else {
@@ -229,7 +241,7 @@ public class AssignmentService {
     	}
     }
     
-    private boolean checkUserExists(Assignment assignment) {
+    private boolean checkUserExists(Assignment assignment) throws UserAccessException {
     	if(assignment.getUser() != null) {
 			if(userService.findById(assignment.getUser().getId()) == null) {
 				return false;
