@@ -144,7 +144,7 @@ public class AssignmentService {
 		save(assignment);
 	}
 	
-	public void deleteAllAttachments(String assignmentId, String taskId) throws AssignmentAccessException {
+	public void deleteAllAttachments(String assignmentId, String taskId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment queriedAssignment = findById(assignmentId);
 		List<Task> tasks = queriedAssignment.getTasks();
 		List<String> attachmentIds = null;
@@ -156,7 +156,7 @@ public class AssignmentService {
 		}
 		gridFsService.deleteFileList(attachmentIds);
 		attachmentIds.clear();
-		assignmentRepository.save(queriedAssignment);
+		save(queriedAssignment);
 	}
 	
 	public Assignment save(Assignment assignment) throws AssignmentStorageException, UserAccessException {

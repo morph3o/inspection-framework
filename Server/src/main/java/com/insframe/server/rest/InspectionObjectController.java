@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.FileUploadException;
 import com.insframe.server.error.InspectionObjectAccessException;
@@ -92,7 +91,7 @@ public class InspectionObjectController {
 	
 	@RequestMapping(value="/{inspectionObjectId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
 	public void deleteInspectionObjectAttachment(@PathVariable("inspectionObjectId") String inspectionObjectId,
-											@PathVariable("attachmentId") String attachmentId) throws InspectionObjectAccessException, AssignmentStorageException, UserAccessException, InspectionObjectStorageException {
+											@PathVariable("attachmentId") String attachmentId) throws InspectionObjectAccessException, UserAccessException, InspectionObjectStorageException {
 		inspectionObjectService.deleteAttachment(inspectionObjectId, attachmentId);
 	}
 }

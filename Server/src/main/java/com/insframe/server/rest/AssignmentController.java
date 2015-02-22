@@ -54,7 +54,7 @@ public class AssignmentController {
 	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.DELETE)
 	@ResponseStatus(value=HttpStatus.NO_CONTENT)
-	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
+	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException {
 		assignmentService.deleteAssignmentById(assignmentId);
 	}
 	
