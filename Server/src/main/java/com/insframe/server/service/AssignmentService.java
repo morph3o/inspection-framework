@@ -80,6 +80,14 @@ public class AssignmentService {
 		return queriedAssignment;
 	}
 	
+	public List<Assignment> findByUserId(String userId) throws AssignmentAccessException {
+		List<Assignment> assignments =  assignmentRepository.findByUserId(new ObjectId(userId));
+		if(assignments == null) {
+			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_TEXT_ID,new String[]{userId});
+		}
+		return assignments;
+	}
+	
 	public void deleteTaskById(String assignmentId, String taskId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment queriedAssignment = findById(assignmentId);
 		List<Task> tasks = queriedAssignment.getTasks();
@@ -187,6 +195,15 @@ public class AssignmentService {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
 			}
 		}
+		
+		if(assignment.getState() == null) {
+			assignment.setState(Assignment.STATE_INITIAL);
+		} else {
+			if(assignment.getState() < 0 || assignment.getState() > 2) {
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(assignment.getState())});
+			}
+		}
+
 		if(assignment.getTasks() == null) {
 			assignment.setTasks(new ArrayList<Task>());
 		} else {
@@ -222,6 +239,7 @@ public class AssignmentService {
     	
 		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
 		oldAssignment.setDescription(updateAssignment.getDescription());
+		oldAssignment.setState(updateAssignment.getState());
 		oldAssignment.setStartDate(updateAssignment.getStartDate());
 		oldAssignment.setEndDate(updateAssignment.getEndDate());
 		oldAssignment.setAttachmentIds(updateAssignment.getAttachmentIds());

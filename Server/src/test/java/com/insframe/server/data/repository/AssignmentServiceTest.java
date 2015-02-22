@@ -55,7 +55,7 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 		List<Task> tasks = new ArrayList<Task>();
 		tasks.add(new Task("Check north pillar", "Check north pillar", Task.STATE_INITIAL));
 		tasks.add(new Task("Check south pillar", "Check south pillar", Task.STATE_INITIAL));
-		Assignment bridgeAssignment = new Assignment("Check Ernst-Walz", "Go to the Ernst-Walz bridge in Heidelberg and perform the needed checks.", false, 
+		Assignment bridgeAssignment = new Assignment("Check Ernst-Walz", "Go to the Ernst-Walz bridge in Heidelberg and perform the needed checks.", false, 0, 
 				tasks, new Date(), new Date(), userService.findByUserName("ppilgrim"), inspectionObjectService.findByObjectName("Ernst-Walz bridge"));
 		
 		InputStream is = new FileInputStream("bridge.jpg");

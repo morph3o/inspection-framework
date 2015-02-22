@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,26 +34,32 @@ public class AssignmentController {
 	private GridFsService gridFsService;
 
 	@RequestMapping(method=RequestMethod.GET)
-    public List<Assignment> getAssignments() throws AssignmentAccessException {		
-		return assignmentService.findAll();
+    public List<Assignment> getAssignments(@RequestParam(value = "user_id", required=false) String userId) throws AssignmentAccessException {
+		if(userId != null) {
+			return assignmentService.findByUserId(userId);
+		} else {
+			return assignmentService.findAll();
+		}
     }
 	
+	@RequestMapping(value="/{assignmentId}", method=RequestMethod.GET)
+	public Assignment getAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
+		return assignmentService.findById(assignmentId);
+	}
+
 	@RequestMapping(method=RequestMethod.POST)
 	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
 		return assignmentService.createAssignment(assignment);
 	}
 	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.DELETE)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
 		assignmentService.deleteAssignmentById(assignmentId);
 	}
 	
-	@RequestMapping(value="/{assignmentId}", method=RequestMethod.GET)
-	public Assignment getAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
-		return assignmentService.findById(assignmentId);
-	}
-	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.PUT)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void updateAssignmentByID(@PathVariable("assignmentId") String assignmentId,
 										@RequestBody Assignment assignment) throws AssignmentAccessException {
 		assignmentService.updateAllAttributesById(assignmentId, assignment);
@@ -112,12 +120,14 @@ public class AssignmentController {
 	}
 
 	@RequestMapping(value="/{assignmentId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void deleteAssignmentAttachment(@PathVariable("assignmentId") String assignmentId,
 									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		assignmentService.deleteAttachment(assignmentId, attachmentId);
 	}
 	
 	@RequestMapping(value="/{assignmentId}/task/{taskId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void deleteTaskAttachment(@PathVariable("assignmentId") String assignmentId,
 									@PathVariable("taskId") String taskId,
 									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
@@ -125,6 +135,7 @@ public class AssignmentController {
 	}
 	
 	@RequestMapping(value="/{assignmentId}/attachment", method=RequestMethod.DELETE)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void deleteAllAttachments(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException{
 		assignmentService.deleteAllAttachments(assignmentId);
 	}
