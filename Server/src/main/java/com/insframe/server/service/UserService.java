@@ -4,17 +4,24 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.UserRepository;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.User;
+import com.insframe.server.security.CustomUserDetails;
 import com.insframe.server.tools.INFRATools;
 
 @Repository
-public class UserService {
-
+public class UserService implements UserDetailsService{
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -56,21 +63,22 @@ public class UserService {
     			throw new UserStorageException(UserStorageException.DUPLICATE_USERNAME, new String[]{user.getUserName()});
     		}
     	}
-//    	if(user.getPassword() == null || user.getPassword().isEmpty()){
-//    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_PASSWORD, new String[]{});
-//    	}
+    	if(user.getPassword() == null || user.getPassword().isEmpty()){
+    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_PASSWORD, new String[]{});
+    	}
     	if(user.getEmailAddress() == null || user.getEmailAddress().isEmpty()){
     		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_EMAIL, new String[]{});
     	} else {
     		if(!INFRATools.isValidEmail(user.getEmailAddress())) throw new UserStorageException(UserStorageException.INVALID_PARAMETER_EMAIL, new String[]{user.getEmailAddress()});
     	}
-//    	else{
-//    		if(user.getEmailAddress().equalsIgnoreCase(userRepository.findByUserName(user.getUserName()).getEmailAddress())){
-//    			throw new UserStorageException(UserStorageException.DUPLICATE_EMAIL, new String[]{user.getEmailAddress()});
-//    		}
-//    	}
     	if(user.getRole() == null || user.getRole().isEmpty()){
     		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_ROLE, new String[]{});
+    	}else{
+    		if(user.getRole().equals("ADMIN")){
+    			user.setRole("ROLE_ADMIN");
+    		} else if(user.getRole().equals("INSPECTOR")){
+    			user.setRole("ROLE_INSPECTOR");
+    		}
     	}
     	userRepository.save(user);
     }
@@ -80,7 +88,11 @@ public class UserService {
     }
     
     public List<User> findAll(){
-    	return userRepository.findAll();
+    	List<User> userList = userRepository.findAll();
+    	for(User user : userList){
+    		user.setPassword(null);
+    	}
+    	return userList;
     }
     
     public User updateUser(User updatedUser, String userid) throws UserAccessException{
@@ -109,5 +121,16 @@ public class UserService {
 		userRepository.save(oldUser);
     	return updatedUser;
     }
+    
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		User user = userRepository.findByUserName(username);
+		
+		if(user == null){
+			throw new UsernameNotFoundException(UserAccessException.USERNAME_NOT_FOUND);
+		}
+
+		return new CustomUserDetails(user, passwordEncoder);
+	}
 	
 }

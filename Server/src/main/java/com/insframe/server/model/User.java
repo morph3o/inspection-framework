@@ -1,19 +1,20 @@
 package com.insframe.server.model;
 
+import java.io.Serializable;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection="users")
-public class User {
+public class User implements Serializable{
 	
 	@Id
 	private String id;
 	@Indexed(unique=true)
 	private String userName;
 	private String emailAddress;
-	@JsonIgnore
 	private String password;
 	private String role;
 	private String lastName;

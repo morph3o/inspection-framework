@@ -22,10 +22,10 @@ public class UserServiceTest extends WebAppConfigurationAware{
 	public void init() throws UserStorageException{
 		userService.deleteAll();
 		
-		userService.save(new User("fpetru", "fpetru@gmail.com", "pass1", "ROLE_ADMIN", "Petrus", "Frank", "+49162123456", "+49162123456"));
-		userService.save(new User("hcarns", "hcarns@gmail.com", "pass2", "ROLE_USER", "Carns", "Hertha", "+49162123456", "+49162123456"));
-		userService.save(new User("ppilgrim", "ppilgrim@gmail.com", "pass3", "ROLE_ADMIN", "Pilgrim", "Parthenia", "+49162123456", "+49162123456"));
-		userService.save(new User("rlongworth", "rlongworth@gmail.com", "pass4", "ROLE_USER", "Longworth", "Reginald", "+49162123456", "+49162123456"));
+		userService.save(new User("fpetru", "fpetru@gmail.com", "pass1", "ADMIN", "Petrus", "Frank", "+49162123456", "+49162123456"));
+		userService.save(new User("hcarns", "hcarns@gmail.com", "pass2", "ADMIN", "Carns", "Hertha", "+49162123456", "+49162123456"));
+		userService.save(new User("ppilgrim", "ppilgrim@gmail.com", "pass3", "ADMIN", "Pilgrim", "Parthenia", "+49162123456", "+49162123456"));
+		userService.save(new User("rlongworth", "rlongworth@gmail.com", "pass4", "INSPECTOR", "Longworth", "Reginald", "+49162123456", "+49162123456"));
 	}
 	
 	@Test
@@ -92,7 +92,7 @@ public class UserServiceTest extends WebAppConfigurationAware{
 		newUser.setEmailAddress("aschultze@gmail.com");
 		newUser.setPhoneNumber("+491623531597");
 		newUser.setMobileNumber("+491623531597");
-		newUser.setRole("ROLE_ADMIN");
+		newUser.setRole("ADMIN");
 		System.out.println("Creating user: "+newUser);
 		
 		userService.save(newUser);
