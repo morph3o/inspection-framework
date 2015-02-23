@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.FileUploadException;
 import com.insframe.server.error.InspectionObjectAccessException;
 import com.insframe.server.error.InspectionObjectStorageException;

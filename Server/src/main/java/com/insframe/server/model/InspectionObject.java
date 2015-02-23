@@ -1,11 +1,14 @@
 package com.insframe.server.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.mongodb.gridfs.GridFSDBFile;
 
 @Document(collection="inspection_objects")
 public class InspectionObject {
@@ -18,7 +21,7 @@ public class InspectionObject {
 	private String description;
 	private String location;
 	private String customerName;
-	private List<String> attachmentIds;
+	private List<Attachment> attachments;
 	
 	public InspectionObject() {
 		super();
@@ -31,19 +34,19 @@ public class InspectionObject {
 		this.customerName = customerName;
 	}
 	
-	public InspectionObject(String objectName, String description, String location, String customerName, List<String> attachmentIds) {
+	public InspectionObject(String objectName, String description, String location, String customerName, List<Attachment> attachments) {
 		this.objectName = objectName;
 		this.description = description;
 		this.location = location;
 		this.customerName = customerName;
-		this.attachmentIds = attachmentIds;
+		this.attachments = attachments;
 	}
 	
 	@Override
 	public String toString(){
 		return "InspectionObject [id=" + id + ", objectName=" + objectName + ", description="
 				+ description + ", location=" + location+ ", customerName=" + customerName 
-				+ " attachments=" + attachmentIds + "]";
+				+ " attachments=" + attachments + "]";
 	}
 
 	public String getDescription() {
@@ -86,19 +89,34 @@ public class InspectionObject {
 		this.id = id;
 	}
 	
-	public List<String> getAttachmentIds() {
+	public List<String> listAttachmentIds() {
+		List<String> attachmentIds = new ArrayList<String>();
+		for (Attachment attachment : attachments) {
+			attachmentIds.add(attachment.getGridFsId());
+		}
 		return attachmentIds;
 	}
+	
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
+	
+	public List<Attachment> setAttachmentDetails(GridFSDBFile gridFsFileInformation, String hostName, String port) {
+		for (Attachment attachment : attachments) {
+			attachment.setAttachmentDetails(gridFsFileInformation, "","");
+		}
+		return attachments;
+	}
 
-	public void setAttachmentIds(List<String> attachmentIds) {
-		this.attachmentIds = attachmentIds;
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
 	}
 	
 	public void addAttachment(String gridFsId) {
-		if(attachmentIds == null){
-			attachmentIds = new ArrayList<String>();
+		if(attachments == null){
+			attachments = new ArrayList<Attachment>();
 		}
-		attachmentIds.add(gridFsId);
+		attachments.add(new Attachment(gridFsId));
 	}
 
 }

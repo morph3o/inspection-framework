@@ -9,12 +9,9 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.InspectionObjectRepository;
-import com.insframe.server.error.AssignmentAccessException;
-import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.InspectionObjectAccessException;
 import com.insframe.server.error.InspectionObjectStorageException;
-import com.insframe.server.error.UserAccessException;
-import com.insframe.server.model.Assignment;
+import com.insframe.server.model.Attachment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.InspectionObject;
 
@@ -34,10 +31,10 @@ public class InspectionObjectService {
 				throw new InspectionObjectStorageException(InspectionObjectStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"objectName"});
 		}
 		
-		if(inspectionObject.getAttachmentIds() == null) {
-			inspectionObject.setAttachmentIds(new ArrayList<String>());
+		if(inspectionObject.getAttachments() == null) {
+			inspectionObject.setAttachments(new ArrayList<Attachment>());
 		}
-		if(gridFsService.checkAttachmentsExist(inspectionObject.getAttachmentIds()) == false) {
+		if(gridFsService.checkAttachmentsExist(inspectionObject.listAttachmentIds()) == false) {
 			throw new InspectionObjectStorageException(InspectionObjectStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
 		}
 		
@@ -89,7 +86,7 @@ public class InspectionObjectService {
     
     public void deleteInspectionObjectByID(String id) throws InspectionObjectAccessException{
     	InspectionObject inspectionObject = this.findById(id);
-    	gridFsService.deleteFileList(inspectionObject.getAttachmentIds());
+    	gridFsService.deleteFileList(inspectionObject.listAttachmentIds());
     	inspectionObjectRepository.delete(id);
     }
     
@@ -122,12 +119,12 @@ public class InspectionObjectService {
     
 	public void deleteAttachment(String inspectionObjectId, String attachmentId) throws InspectionObjectAccessException, InspectionObjectStorageException {
 		InspectionObject inspectionObject = findById(inspectionObjectId);
-		List<String> attachmentIds = inspectionObject.getAttachmentIds();
-		for (int i = 0; i < attachmentIds.size(); i++) {
-			String assignedAttachmentId = attachmentIds.get(i);
-			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
-				gridFsService.deleteById(assignedAttachmentId);
-				attachmentIds.remove(assignedAttachmentId);
+		List<Attachment> attachments = inspectionObject.getAttachments();
+		for (int i = 0; i < attachments.size(); i++) {
+			Attachment assignedAttachment = attachments.get(i);
+			if(assignedAttachment.getGridFsId().equalsIgnoreCase(attachmentId)){
+				gridFsService.deleteById(assignedAttachment.getGridFsId());
+				attachments.remove(assignedAttachment);
 			}
 		}
 		save(inspectionObject);
