@@ -2,11 +2,11 @@ package com.insframe.server.model;
 
 import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+@SuppressWarnings("serial")
 @Document(collection="users")
 public class User implements Serializable{
 	

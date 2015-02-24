@@ -31,7 +31,7 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	public void executePrintAllInspectionObjects() throws InspectionObjectAccessException{
 		System.out.println("****** Should Show all the inspectionObjects in the database ******");
 		System.out.println("Show the 4 inspectionObjects and their data");
-		List<InspectionObject> inspectionObjectList = inspectionObjectService.findAll();
+		List<InspectionObject> inspectionObjectList = inspectionObjectService.findAll(false);
 		for(InspectionObject inspectionObject : inspectionObjectList){
 			System.out.println(inspectionObject);
 		}
@@ -43,11 +43,11 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	public void executeInspectionObjectByIdDeletion() throws InspectionObjectAccessException {
 		System.out.println("****** Should Delete InspectionObject by ID ******");
 		System.out.println("Now the first returned inspection object will be deleted.");
-		List<InspectionObject> inspectionObjectList = inspectionObjectService.findAll();
+		List<InspectionObject> inspectionObjectList = inspectionObjectService.findAll(false);
 		Assert.assertNotNull(inspectionObjectService.findById(inspectionObjectList.get(0).getId()));
 		inspectionObjectService.deleteInspectionObjectByID(inspectionObjectList.get(0).getId());
 		Assert.assertNull(inspectionObjectService.findById(inspectionObjectList.get(0).getId()));
-		inspectionObjectList = inspectionObjectService.findAll();
+		inspectionObjectList = inspectionObjectService.findAll(false);
 		Assert.assertTrue(inspectionObjectList.size() == 3);
 		System.out.println("First inspection object was deleted.");
 		System.out.println("****** End of deletion of InspectionObject by ID ******");
@@ -56,7 +56,7 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	@Test
 	public void executeShowInspectionObjectByObjectName() throws InspectionObjectAccessException{
 		System.out.println("****** Should show InspectionObject found by ObjectName ******");
-		InspectionObject inspectionObject = (InspectionObject) inspectionObjectService.findByObjectName("University of Mannheim");
+		InspectionObject inspectionObject = (InspectionObject) inspectionObjectService.findByObjectName("University of Mannheim", false);
 		
 		Assert.assertNotNull(inspectionObject);
 		Assert.assertEquals("University of Mannheim", inspectionObject.getObjectName());
@@ -71,13 +71,13 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	@Test
 	public void executeUpdateInspectionObject() throws InspectionObjectAccessException, InspectionObjectStorageException{
 		System.out.println("****** execute update InspectionObject ******");
-		InspectionObject inspectionObject = inspectionObjectService.findByObjectName("University of Mannheim");
+		InspectionObject inspectionObject = inspectionObjectService.findByObjectName("University of Mannheim", false);
 		System.out.println(inspectionObject);
 		inspectionObject.setDescription("Mannheim University");
 		
 		inspectionObjectService.updateById(inspectionObject.getId(), inspectionObject);
 		
-		InspectionObject newInspectionObject = inspectionObjectService.findByObjectName("University of Mannheim");
+		InspectionObject newInspectionObject = inspectionObjectService.findByObjectName("University of Mannheim", false);
 		System.out.println(newInspectionObject);
 		Assert.assertEquals("Mannheim University", newInspectionObject.getDescription());
 		System.out.println("****** End of execute update InspectionObject ******");

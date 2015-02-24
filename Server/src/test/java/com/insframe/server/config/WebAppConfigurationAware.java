@@ -15,7 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
 @ContextConfiguration(classes = {
-        ApplicationConfig.class,
+		DevApplicationConfig.class,
         MongoConfig.class,
         MailSenderConfig.class,
         NoCsrfSecurityConfig.class,

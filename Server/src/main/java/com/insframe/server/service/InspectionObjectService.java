@@ -25,7 +25,47 @@ public class InspectionObjectService {
 	@Autowired	
 	private MongoOperations mongoOpts;
 	
-	public InspectionObject save(InspectionObject inspectionObject) throws InspectionObjectStorageException {
+	@SuppressWarnings("null")
+	public List<InspectionObject> findAll(Boolean addAttachmentDetails) throws InspectionObjectAccessException {
+    	List<InspectionObject> queriedInspectionObjectList = inspectionObjectRepository.findAll();
+    	if(queriedInspectionObjectList != null || queriedInspectionObjectList.size() > 0) {
+    		if(addAttachmentDetails) {
+    			for (InspectionObject inspectionObject : queriedInspectionObjectList) {
+    				gridFsService.addAttachmentDetails(inspectionObject.getAttachments());
+				}
+    		}
+    		return queriedInspectionObjectList;
+    	} else{
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
+    	}
+	}
+	
+	@SuppressWarnings("null")
+	public List<InspectionObject> findByCustomerName(String customerName, Boolean addAttachmentDetails) throws InspectionObjectAccessException {
+    	List<InspectionObject> queriedInspectionObjectList = inspectionObjectRepository.findByCustomerName(customerName);
+    	if(queriedInspectionObjectList != null || queriedInspectionObjectList.size() > 0) {
+    		if(addAttachmentDetails) {
+    			for (InspectionObject inspectionObject : queriedInspectionObjectList) {
+    				gridFsService.addAttachmentDetails(inspectionObject.getAttachments());
+				}
+    		}
+    		return queriedInspectionObjectList;
+    	} else{
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_CUSTOMERNAME_TEXT_ID,new String[]{customerName});
+    	}
+	}
+	
+	public InspectionObject findByObjectName(String objectName, Boolean addAttachmentDetails) throws InspectionObjectAccessException {
+    	InspectionObject queriedInspectionObject = inspectionObjectRepository.findByObjectName(objectName);
+    	if(queriedInspectionObject != null) {
+    		if(addAttachmentDetails) gridFsService.addAttachmentDetails(queriedInspectionObject.getAttachments());;
+    		return queriedInspectionObject;
+    	} else{
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_OBJECTNAME_TEXT_ID,new String[]{objectName});
+    	}
+	}
+	
+    public InspectionObject save(InspectionObject inspectionObject) throws InspectionObjectStorageException {
 		if(inspectionObject.getObjectName() == null
 				|| inspectionObject.getObjectName() == "") {
 				throw new InspectionObjectStorageException(InspectionObjectStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"objectName"});
@@ -49,37 +89,8 @@ public class InspectionObjectService {
 			}
 		}
 	}
-	
-	@SuppressWarnings("null")
-	public List<InspectionObject> findAll() throws InspectionObjectAccessException {
-    	List<InspectionObject> queriedInspectionObjectList = inspectionObjectRepository.findAll();
-    	if(queriedInspectionObjectList != null || queriedInspectionObjectList.size() > 0) {
-    		return queriedInspectionObjectList;
-    	} else{
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
-    	}
-	}
-	
-	@SuppressWarnings("null")
-	public List<InspectionObject> findByCustomerName(String customerName) throws InspectionObjectAccessException {
-    	List<InspectionObject> queriedInspectionObjectList = inspectionObjectRepository.findByCustomerName(customerName);
-    	if(queriedInspectionObjectList != null || queriedInspectionObjectList.size() > 0) {
-    		return queriedInspectionObjectList;
-    	} else{
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_CUSTOMERNAME_TEXT_ID,new String[]{customerName});
-    	}
-	}
-	
-	public InspectionObject findByObjectName(String objectName) throws InspectionObjectAccessException {
-    	InspectionObject queriedInspectionObject = inspectionObjectRepository.findByObjectName(objectName);
-    	if(queriedInspectionObject != null) {
-    		return queriedInspectionObject;
-    	} else{
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_OBJECTNAME_TEXT_ID,new String[]{objectName});
-    	}
-	}
-	
-    public void deleteAll(){
+
+	public void deleteAll(){
     	// TODO: make sure that also the attachments are deleted!
     	inspectionObjectRepository.deleteAll();
     }

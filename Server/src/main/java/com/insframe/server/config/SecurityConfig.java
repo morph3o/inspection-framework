@@ -17,6 +17,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import com.insframe.server.rest.UserController;
 import com.insframe.server.security.RestAuthenticationAccessDeniedHandler;
 import com.insframe.server.security.RestAuthenticationEntryPoint;
+import com.insframe.server.security.RestAuthenticationFailureHandler;
 import com.insframe.server.security.RestAuthenticationSuccessHandler;
 import com.insframe.server.service.UserService;
 import com.insframe.server.support.service.SimpleCORSFilter;
@@ -34,6 +35,8 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private RestAuthenticationSuccessHandler successHandler;
 	@Autowired
 	private RestAuthenticationAccessDeniedHandler accessDeniedHandler;
+	@Autowired
+	private RestAuthenticationFailureHandler failureHandler;
 
     @Bean
     public TokenBasedRememberMeServices rememberMeServices() {
@@ -74,13 +77,14 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
             	.usernameParameter("username")
             	.passwordParameter("password")
             	.successHandler(successHandler)
+            	.failureHandler(failureHandler)
                 .and()
             .logout()
             	.permitAll()
             	.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
             	.and()
             .sessionManagement()
-            .maximumSessions(1);
+            .maximumSessions(10);
 	   
         http.authorizeRequests()
 	        	.antMatchers("/login", "/favicon.ico", "/resources/**").permitAll()

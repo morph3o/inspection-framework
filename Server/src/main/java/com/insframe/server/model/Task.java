@@ -3,8 +3,6 @@ package com.insframe.server.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bson.types.ObjectId;
-
 public class Task {
 	public static final Integer STATE_INITIAL = 0;
 	/**

@@ -1,14 +1,11 @@
 package com.insframe.server.model;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.mongodb.gridfs.GridFSDBFile;
 
 @Document(collection="inspection_objects")
 public class InspectionObject {
@@ -98,13 +95,6 @@ public class InspectionObject {
 	}
 	
 	public List<Attachment> getAttachments() {
-		return attachments;
-	}
-	
-	public List<Attachment> setAttachmentDetails(GridFSDBFile gridFsFileInformation, String hostName, String port) {
-		for (Attachment attachment : attachments) {
-			attachment.setAttachmentDetails(gridFsFileInformation, "","");
-		}
 		return attachments;
 	}
 

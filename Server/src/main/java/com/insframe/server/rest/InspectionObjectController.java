@@ -30,11 +30,12 @@ public class InspectionObjectController {
 	private InspectionObjectService inspectionObjectService;
 
 	@RequestMapping(method=RequestMethod.GET)
-    public List<InspectionObject> getInspectionObjectsByCustomerName(@RequestParam(required=false, value="customerName") String customerName) throws InspectionObjectAccessException {
+    public List<InspectionObject> getInspectionObjectsByCustomerName(@RequestParam(required=false, value="customerName") String customerName,
+    																@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws InspectionObjectAccessException {
 		if(customerName == null) {
-			return inspectionObjectService.findAll();
+			return inspectionObjectService.findAll(addAttachmentDetails);
 		} else {
-			return inspectionObjectService.findByCustomerName(customerName);
+			return inspectionObjectService.findByCustomerName(customerName, addAttachmentDetails);
 		}
     }
 	
