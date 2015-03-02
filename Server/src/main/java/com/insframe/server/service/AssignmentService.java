@@ -213,6 +213,10 @@ public class AssignmentService {
 				}
 				if(task.getState() == null) {
 					task.setState(Task.STATE_OKAY);
+				} else {
+					if(task.getState() < Task.STATE_OKAY || task.getState() > Task.STATE_OKAY) {
+						throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(task.getState()), task.getTaskName()});
+					}
 				}
 			}
 		}

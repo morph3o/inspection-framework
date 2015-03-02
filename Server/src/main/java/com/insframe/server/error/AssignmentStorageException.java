@@ -7,6 +7,7 @@ public class AssignmentStorageException extends
 	public static final String MISSING_MANDATORY_PARAMETER_TEXT_ID = "error.assignment.missing.mandatory.parameter";
 	public static final String INVALID_USER_REF_TEXT_ID = "error.assignment.invalid.user.ref";
 	public static final String INVALID_INSP_OBJECT_REF_TEXT_ID = "error.assignment.invalid.inspection.object.ref";
+	public static final String INVALID_TASK_STATE_TEXT_ID = "error.assignment.invalid.task.state";
 	public static final String INVALID_STATE_TEXT_ID = "error.assignment.invalid.state";
 	public static final String INVALID_ATTACHMENT_REF_TEXT_ID = "error.assignment.invalid.attachment.ref";
 	public static final String INVALID_TEMPLATE_ATTR_TEXT_ID = "error.assignment.invalid.template.attr";
