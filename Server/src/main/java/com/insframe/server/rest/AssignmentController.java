@@ -21,6 +21,7 @@ import com.insframe.server.error.FileUploadException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
+import com.insframe.server.model.Task;
 import com.insframe.server.service.AssignmentService;
 import com.insframe.server.service.GridFsService;
 
@@ -45,6 +46,11 @@ public class AssignmentController {
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.GET)
 	public Assignment getAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
 		return assignmentService.findById(assignmentId);
+	}
+	
+	@RequestMapping(value="/{assignmentId}/task", method=RequestMethod.GET)
+	public List<Task> getAssignmentTasks(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
+		return assignmentService.findById(assignmentId).getTasks();
 	}
 
 	@RequestMapping(method=RequestMethod.POST)

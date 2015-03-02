@@ -211,6 +211,9 @@ public class AssignmentService {
 				if(task.getId() == null) {
 					task.setId(ObjectId.get().toString());
 				}
+				if(task.getState() == null) {
+					task.setState(Task.STATE_OKAY);
+				}
 			}
 		}
 

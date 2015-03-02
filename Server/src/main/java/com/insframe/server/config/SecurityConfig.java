@@ -67,6 +67,10 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
         	.csrf().disable()
         	.addFilterBefore(new SimpleCORSFilter(), ChannelProcessingFilter.class)
+            .authorizeRequests()
+                .antMatchers("/", "/users/", "/users/**", "/inspectionobject/", "/inspectionobject/**", "/assignment/", "/assignment/**", "/attachment/", "/attachment/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
         	.exceptionHandling()
         		.authenticationEntryPoint(authenticationEntryPoint)
         		.accessDeniedHandler(accessDeniedHandler)
