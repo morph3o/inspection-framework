@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,7 @@ import com.insframe.server.error.FileUploadException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
+import com.insframe.server.model.Task;
 import com.insframe.server.service.AssignmentService;
 import com.insframe.server.service.GridFsService;
 
@@ -32,26 +35,37 @@ public class AssignmentController {
 	private GridFsService gridFsService;
 
 	@RequestMapping(method=RequestMethod.GET)
-    public List<Assignment> getAssignments() throws AssignmentAccessException {		
-		return assignmentService.findAll();
+    public List<Assignment> getAssignments(@RequestParam(value = "user_id", required=false) String userId) throws AssignmentAccessException {
+		if(userId != null) {
+			return assignmentService.findByUserId(userId);
+		} else {
+			return assignmentService.findAll();
+		}
     }
-	
-	@RequestMapping(method=RequestMethod.POST)
-	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
-		return assignmentService.createAssignment(assignment);
-	}
-	
-	@RequestMapping(value="/{assignmentId}", method=RequestMethod.DELETE)
-	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
-		assignmentService.deleteAssignmentById(assignmentId);
-	}
 	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.GET)
 	public Assignment getAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
 		return assignmentService.findById(assignmentId);
 	}
 	
+	@RequestMapping(value="/{assignmentId}/task", method=RequestMethod.GET)
+	public List<Task> getAssignmentTasks(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
+		return assignmentService.findById(assignmentId).getTasks();
+	}
+
+	@RequestMapping(method=RequestMethod.POST)
+	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
+		return assignmentService.createAssignment(assignment);
+	}
+	
+	@RequestMapping(value="/{assignmentId}", method=RequestMethod.DELETE)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
+	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException {
+		assignmentService.deleteAssignmentById(assignmentId);
+	}
+	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.PUT)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void updateAssignmentByID(@PathVariable("assignmentId") String assignmentId,
 										@RequestBody Assignment assignment) throws AssignmentAccessException {
 		assignmentService.updateAllAttributesById(assignmentId, assignment);
@@ -69,7 +83,7 @@ public class AssignmentController {
 		for (int i = 0; i < fileList.size(); i++) {
 			MultipartFile multipartFile = fileList.get(i);
 			if (!multipartFile.isEmpty()) {
-	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or even malicious files!)
+	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or malicious files!)
 	        	// as this is a student project, it is not the primary concern
 	        	// https://wiki.mozilla.org/WebAppSec/Secure_Coding_Guidelines#Uploads
 	        	// http://stackoverflow.com/questions/9354300/securing-file-upload
@@ -96,7 +110,7 @@ public class AssignmentController {
 		for (int i = 0; i < fileList.size(); i++) {
 			MultipartFile multipartFile = fileList.get(i);
 			if (!multipartFile.isEmpty()) {
-	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or even malicious files!)
+	        	// TODO: Up to now it is possible to upload any type of file (even corrupted or malicious files!)
 	        	// as this is a student project, it is not the primary concern
 	        	// https://wiki.mozilla.org/WebAppSec/Secure_Coding_Guidelines#Uploads
 	        	// http://stackoverflow.com/questions/9354300/securing-file-upload
@@ -112,12 +126,14 @@ public class AssignmentController {
 	}
 
 	@RequestMapping(value="/{assignmentId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void deleteAssignmentAttachment(@PathVariable("assignmentId") String assignmentId,
 									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		assignmentService.deleteAttachment(assignmentId, attachmentId);
 	}
 	
 	@RequestMapping(value="/{assignmentId}/task/{taskId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void deleteTaskAttachment(@PathVariable("assignmentId") String assignmentId,
 									@PathVariable("taskId") String taskId,
 									@PathVariable("attachmentId") String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
@@ -125,7 +141,8 @@ public class AssignmentController {
 	}
 	
 	@RequestMapping(value="/{assignmentId}/attachment", method=RequestMethod.DELETE)
-	public void deleteAllAttachments(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException{
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
+	public void deleteAllAttachments(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException{
 		assignmentService.deleteAllAttachments(assignmentId);
 	}
 }

@@ -1,18 +1,12 @@
 package com.insframe.server.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import org.bson.types.ObjectId;
-
 public class Task {
-	public static final Integer STATE_INITIAL = 0;
-	/**
-	 * Do we need an in progress status? because when a user starts a task he/she should finish it and not leave
-	 * tasks in progress.
-	 * */
-	public static final Integer STATE_IN_PROGRESS = 1; 
-	public static final Integer STATE_FINISHED = 2;
+	public static final Integer STATE_OKAY = 0;
+	public static final Integer STATE_ERROR = 1;
 	
 	private String id;
 	private String taskName;

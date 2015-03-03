@@ -1,7 +1,6 @@
 package com.insframe.server.rest;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,13 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.insframe.server.error.InspectionObjectAccessException;
-import com.insframe.server.model.FileMetaData;
 import com.insframe.server.service.AssignmentService;
 import com.insframe.server.service.GridFsService;
 import com.mongodb.gridfs.GridFSDBFile;
@@ -37,7 +31,6 @@ public class AttachmentController {
 	   IOUtils.copy(gridFsImage.getInputStream(), response.getOutputStream());
 	   response.getOutputStream().flush();
 	} 
-	
 	/*
 	 method only used for development purposes
 	*/

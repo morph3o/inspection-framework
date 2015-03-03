@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.insframe.server.config.WebAppConfigurationAware;
 import com.insframe.server.error.AssignmentStorageException;
+import com.insframe.server.error.InspectionObjectStorageException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.Assignment;
@@ -37,7 +38,7 @@ public class TestData extends WebAppConfigurationAware{
 	private GridFsService gridFsService;
 	
 	@Before
-	public void init() throws UserStorageException, FileNotFoundException, AssignmentStorageException, UserAccessException{
+	public void init() throws UserStorageException, FileNotFoundException, AssignmentStorageException, UserAccessException, InspectionObjectStorageException{
 		
 		/**
 		 * Clean all the documents of the database
@@ -140,6 +141,7 @@ public class TestData extends WebAppConfigurationAware{
 		Assignment as1 = new Assignment("Check computers of the Studentenwerk office", 
 										"It is necessary to do the routine check of the computers in the Studentenwerk.", 
 										false, 
+										Assignment.STATE_INITIAL,
 										null, 
 										new Date(), 
 										new Date(), 
@@ -149,9 +151,9 @@ public class TestData extends WebAppConfigurationAware{
 		/**
 		 * Set of the tasks
 		 * */
-		Task task1 = new Task("Check computer of the reception", "Check computer of the reception", Task.STATE_INITIAL);
-		Task task2 = new Task("Check computer of the secretary", "Check computer of the secretary", Task.STATE_INITIAL);
-		Task task3 = new Task("Check computer of the other secretary", "Check computer of the other secretary, this computer use Linux", Task.STATE_INITIAL);
+		Task task1 = new Task("Check computer of the reception", "Check computer of the reception", Task.STATE_OKAY);
+		Task task2 = new Task("Check computer of the secretary", "Check computer of the secretary", Task.STATE_OKAY);
+		Task task3 = new Task("Check computer of the other secretary", "Check computer of the other secretary, this computer use Linux", Task.STATE_OKAY);
 		
 		List<Task> tasks = new ArrayList<Task>();
 		tasks.add(task1);

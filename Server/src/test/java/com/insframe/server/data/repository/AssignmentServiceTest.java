@@ -17,6 +17,7 @@ import com.insframe.server.config.WebAppConfigurationAware;
 import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.InspectionObjectAccessException;
+import com.insframe.server.error.InspectionObjectStorageException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.Assignment;
@@ -41,7 +42,7 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 	private GridFsService gridFsService;
 	
 	@Before
-	public void init() throws FileNotFoundException, AssignmentStorageException, InspectionObjectAccessException, UserAccessException, UserStorageException{
+	public void init() throws FileNotFoundException, AssignmentStorageException, InspectionObjectAccessException, UserAccessException, UserStorageException, InspectionObjectStorageException{
 		assignmentService.deleteAll();
 		assignmentService.save(new Assignment("Check University of Mannheim", "Go to the university of Mannheim and perform the needed checks.", true));
 		
@@ -52,10 +53,10 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 			// TODO: handle exception
 		}
 		List<Task> tasks = new ArrayList<Task>();
-		tasks.add(new Task("Check north pillar", "Check north pillar", Task.STATE_INITIAL));
-		tasks.add(new Task("Check south pillar", "Check south pillar", Task.STATE_INITIAL));
-		Assignment bridgeAssignment = new Assignment("Check Ernst-Walz", "Go to the Ernst-Walz bridge in Heidelberg and perform the needed checks.", false, 
-				tasks, new Date(), new Date(), userService.findByUserName("ppilgrim"), inspectionObjectService.findByObjectName("Ernst-Walz bridge"));
+		tasks.add(new Task("Check north pillar", "Check north pillar", Task.STATE_OKAY));
+		tasks.add(new Task("Check south pillar", "Check south pillar", Task.STATE_OKAY));
+		Assignment bridgeAssignment = new Assignment("Check Ernst-Walz", "Go to the Ernst-Walz bridge in Heidelberg and perform the needed checks.", false, 0, 
+				tasks, new Date(), new Date(), userService.findByUserName("ppilgrim"), inspectionObjectService.findByObjectName("Ernst-Walz bridge", false));
 		
 		InputStream is = new FileInputStream("bridge.jpg");
 		

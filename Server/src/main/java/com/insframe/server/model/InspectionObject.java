@@ -1,5 +1,8 @@
 package com.insframe.server.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,6 +18,7 @@ public class InspectionObject {
 	private String description;
 	private String location;
 	private String customerName;
+	private List<Attachment> attachments;
 	
 	public InspectionObject() {
 		super();
@@ -27,10 +31,19 @@ public class InspectionObject {
 		this.customerName = customerName;
 	}
 	
+	public InspectionObject(String objectName, String description, String location, String customerName, List<Attachment> attachments) {
+		this.objectName = objectName;
+		this.description = description;
+		this.location = location;
+		this.customerName = customerName;
+		this.attachments = attachments;
+	}
+	
 	@Override
 	public String toString(){
 		return "InspectionObject [id=" + id + ", objectName=" + objectName + ", description="
-				+ description + ", location=" + location+ ", customerName=" + customerName + "]";
+				+ description + ", location=" + location+ ", customerName=" + customerName 
+				+ " attachments=" + attachments + "]";
 	}
 
 	public String getDescription() {
@@ -72,4 +85,28 @@ public class InspectionObject {
 	public void setId(String id) {
 		this.id = id;
 	}
+	
+	public List<String> listAttachmentIds() {
+		List<String> attachmentIds = new ArrayList<String>();
+		for (Attachment attachment : attachments) {
+			attachmentIds.add(attachment.getGridFsId());
+		}
+		return attachmentIds;
+	}
+	
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
+	}
+	
+	public void addAttachment(String gridFsId) {
+		if(attachments == null){
+			attachments = new ArrayList<Attachment>();
+		}
+		attachments.add(new Attachment(gridFsId));
+	}
+
 }

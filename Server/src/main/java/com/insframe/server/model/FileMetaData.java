@@ -5,17 +5,20 @@ import com.mongodb.BasicDBObject;
 
 @SuppressWarnings("serial")
 public class FileMetaData extends BasicDBObject {
-	private String fileDescription;
+	public FileMetaData() {
+		super();
+	}
 	
 	public FileMetaData(String fileDescription) {
+		super();
 		this.setFileDescription(fileDescription); 
 	}
 
 	public String getFileDescription() {
-		return fileDescription;
+		return (String) this.get("fileDescription");
 	}
 
 	public void setFileDescription(String fileDescription) {
-		this.fileDescription = fileDescription;
+		this.append("fileDescription", fileDescription);
 	}
 }
