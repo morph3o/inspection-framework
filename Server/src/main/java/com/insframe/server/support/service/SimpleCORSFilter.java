@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SimpleCORSFilter implements Filter{
-	static final String ORIGIN = "Host";
+	static final String ORIGIN = "Origin";
 	
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
