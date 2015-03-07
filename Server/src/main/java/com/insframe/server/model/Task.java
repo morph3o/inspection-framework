@@ -5,12 +5,14 @@ import java.util.Date;
 import java.util.List;
 
 public class Task {
-	public static final Integer STATE_OKAY = 0;
-	public static final Integer STATE_ERROR = 1;
+	public static final Integer STATE_INITIAL = 0;
+	public static final Integer STATE_OKAY = 1;
+	public static final Integer STATE_ERROR = 2;
 	
 	private String id;
 	private String taskName;
 	private String description;
+	private String errorDescription;
 	private Integer state;
 	private List<String> attachmentIds;
 
@@ -75,5 +77,13 @@ public class Task {
 			attachmentIds = new ArrayList<String>();
 		}
 		attachmentIds.add(gridFsId);
+	}
+
+	public String getErrorDescription() {
+		return errorDescription;
+	}
+
+	public void setErrorDescription(String errorDescription) {
+		this.errorDescription = errorDescription;
 	}
 }

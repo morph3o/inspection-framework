@@ -52,8 +52,9 @@ public class InspectionObjectController {
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.GET)
-	public InspectionObject getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
-		return inspectionObjectService.findById(inspectionObjectId);
+	public InspectionObject getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId,
+													@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws InspectionObjectAccessException {
+		return inspectionObjectService.findById(inspectionObjectId, addAttachmentDetails);
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.PUT)
@@ -64,7 +65,7 @@ public class InspectionObjectController {
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}/attachment", method=RequestMethod.POST)
-	public void addAttachmentToAssignment(@PathVariable("inspectionObjectId") String inspectionObjectId,
+	public void addAttachmentToInspectionObject(@PathVariable("inspectionObjectId") String inspectionObjectId,
 									@RequestParam("fileUpload") List<MultipartFile> fileList,
 									@RequestParam(value = "fileDescription", required = false) List<String> descriptionList)
 								 throws InspectionObjectAccessException, IOException, FileUploadException, InspectionObjectStorageException {

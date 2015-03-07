@@ -40,6 +40,16 @@ public class InspectionObjectService {
     	}
 	}
 	
+	public InspectionObject findById(String id, Boolean addAttachmentDetails) throws InspectionObjectAccessException{
+		InspectionObject queriedInspectionObject = inspectionObjectRepository.findById(id);
+		if(queriedInspectionObject != null) {
+			if(addAttachmentDetails) gridFsService.addAttachmentDetails(queriedInspectionObject.getAttachments());
+			return queriedInspectionObject;
+		} else{
+			throw new InspectionObjectAccessException(InspectionObjectAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
+		}
+	}
+
 	@SuppressWarnings("null")
 	public List<InspectionObject> findByCustomerName(String customerName, Boolean addAttachmentDetails) throws InspectionObjectAccessException {
     	List<InspectionObject> queriedInspectionObjectList = inspectionObjectRepository.findByCustomerName(customerName);
@@ -96,22 +106,13 @@ public class InspectionObjectService {
     }
     
     public void deleteInspectionObjectByID(String id) throws InspectionObjectAccessException{
-    	InspectionObject inspectionObject = this.findById(id);
+    	InspectionObject inspectionObject = this.findById(id, false);
     	gridFsService.deleteFileList(inspectionObject.listAttachmentIds());
     	inspectionObjectRepository.delete(id);
     }
     
-    public InspectionObject findById(String id) throws InspectionObjectAccessException{
-    	InspectionObject queriedInspectionObject = inspectionObjectRepository.findById(id);
-    	if(queriedInspectionObject != null) {
-    		return queriedInspectionObject;
-    	} else{
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
-    	}
-    }
-    
     public InspectionObject updateById(String id, InspectionObject updateInspectionObject) throws InspectionObjectAccessException, InspectionObjectStorageException {
-    	InspectionObject oldInspectionObject = this.findById(id);
+    	InspectionObject oldInspectionObject = this.findById(id, false);
     	
 		oldInspectionObject.setObjectName(updateInspectionObject.getObjectName());
 		oldInspectionObject.setCustomerName(updateInspectionObject.getCustomerName());
@@ -123,13 +124,13 @@ public class InspectionObjectService {
     }
     
     public void addAttachmentToInspectionObject(String inspectionObjectId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws InspectionObjectAccessException, InspectionObjectStorageException {
-		InspectionObject inspectionObject = findById(inspectionObjectId);
+		InspectionObject inspectionObject = findById(inspectionObjectId, false);
 		inspectionObject.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
 		this.save(inspectionObject);
 	}
     
 	public void deleteAttachment(String inspectionObjectId, String attachmentId) throws InspectionObjectAccessException, InspectionObjectStorageException {
-		InspectionObject inspectionObject = findById(inspectionObjectId);
+		InspectionObject inspectionObject = findById(inspectionObjectId, false);
 		List<Attachment> attachments = inspectionObject.getAttachments();
 		for (int i = 0; i < attachments.size(); i++) {
 			Attachment assignedAttachment = attachments.get(i);

@@ -80,11 +80,12 @@ public class GridFsService implements GridFsRepository {
 	}
 
 	public void addAttachmentDetails(List<Attachment> attachments) {
-		for (Attachment attachment : attachments) {
-
-			attachment.setAttachmentDetails(
-					this.findById(attachment.getGridFsId()), protocol,
-					serverHostName, serverContextPath, serverPort);
+		if(attachments != null) {
+			for (Attachment attachment : attachments) {
+				attachment.setAttachmentDetails(
+						this.findById(attachment.getGridFsId()), protocol,
+						serverHostName, serverContextPath, serverPort);
+			}
 		}
 	}
 }

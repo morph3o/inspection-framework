@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -131,6 +133,14 @@ public class UserService implements UserDetailsService{
 		}
 
 		return new CustomUserDetails(user, passwordEncoder);
+	}
+	
+	public User getCurrentUser() {
+		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication.getPrincipal() instanceof CustomUserDetails) {
+			return ((CustomUserDetails) authentication.getPrincipal()).getUser();
+		}
+		return null;
 	}
 	
 }

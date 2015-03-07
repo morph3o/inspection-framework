@@ -52,6 +52,12 @@ public class AssignmentController {
 	public List<Task> getAssignmentTasks(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
 		return assignmentService.findById(assignmentId).getTasks();
 	}
+	
+	@RequestMapping(value="/{assignmentId}/task/{taskId}", method=RequestMethod.GET)
+	public Task getAssignmentTask(@PathVariable("assignmentId") String assignmentId,
+							  		@PathVariable("taskId") String taskId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+		return assignmentService.findTaskById(assignmentId, taskId);
+	}
 
 	@RequestMapping(method=RequestMethod.POST)
 	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
@@ -67,7 +73,7 @@ public class AssignmentController {
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.PUT)
 	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void updateAssignmentByID(@PathVariable("assignmentId") String assignmentId,
-										@RequestBody Assignment assignment) throws AssignmentAccessException {
+										@RequestBody Assignment assignment) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		assignmentService.updateAllAttributesById(assignmentId, assignment);
 	}
 	
@@ -76,7 +82,7 @@ public class AssignmentController {
 	public void addAttachmentToAssignment(@PathVariable("assignmentId") String assignmentId,
 									@RequestParam("fileUpload") List<MultipartFile> fileList,
 									@RequestParam(value = "fileDescription", required = false) List<String> descriptionList)
-								 throws AssignmentAccessException, IOException, FileUploadException{
+								 throws AssignmentAccessException, IOException, FileUploadException, AssignmentStorageException, UserAccessException{
 		if(descriptionList == null){
 			descriptionList = new ArrayList<String>();
 		}
@@ -103,7 +109,7 @@ public class AssignmentController {
 									@PathVariable("taskId") String taskId,
 									@RequestParam("fileUpload") List<MultipartFile> fileList,
 									@RequestParam(value = "fileDescription", required = false) List<String> descriptionList)
-								 throws AssignmentAccessException, IOException, FileUploadException{
+								 throws AssignmentAccessException, IOException, FileUploadException, AssignmentStorageException, UserAccessException{
 		if(descriptionList == null){
 			descriptionList = new ArrayList<String>();
 		}

@@ -2,11 +2,14 @@ package com.insframe.server.service;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.AssignmentRepository;
@@ -17,6 +20,8 @@ import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.Task;
+import com.insframe.server.model.User;
+import com.insframe.server.security.CustomUserDetails;
 
 @Repository
 public class AssignmentService {
@@ -32,18 +37,18 @@ public class AssignmentService {
 	@Autowired
 	UserService userService;
 	
-    public void addAttachmentToAssignment(String assignmentId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException {
+    public void addAttachmentToAssignment(String assignmentId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
 		assignment.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
-		assignmentRepository.save(assignment);
+		save(assignment);
 	}
     
-    public void addAttachmentToTask(String assignmentId, String taskId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException {
+    public void addAttachmentToTask(String assignmentId, String taskId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {   	
     	Assignment assignment = findById(assignmentId);
     	Task task = assignment.getTask(taskId);
 		if(task != null) {
 			task.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
-			assignmentRepository.save(assignment);
+			save(assignment);
 		} else {
 			throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,new String[]{assignmentId, taskId});
 		}
@@ -69,7 +74,7 @@ public class AssignmentService {
 		if(assignments == null) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
 		}
-		return assignments;
+		return filterByLoginUser(assignments);
 	}
 
 	public Assignment findByAssignmentName(String assignmentName) throws AssignmentAccessException {
@@ -85,7 +90,16 @@ public class AssignmentService {
 		if(assignments == null) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_TEXT_ID,new String[]{userId});
 		}
-		return assignments;
+		return filterByLoginUser(assignments);
+	}
+	
+	public Task findTaskById(String assignmentId, String taskId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+		Task queriedTask = findById(assignmentId).getTask(taskId);
+		if(queriedTask != null) {
+			return queriedTask;
+		} else {
+			throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,new String[]{assignmentId, taskId});
+		}
 	}
 	
 	public void deleteTaskById(String assignmentId, String taskId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
@@ -214,7 +228,7 @@ public class AssignmentService {
 				if(task.getState() == null) {
 					task.setState(Task.STATE_OKAY);
 				} else {
-					if(task.getState() < Task.STATE_OKAY || task.getState() > Task.STATE_OKAY) {
+					if(task.getState() < Task.STATE_INITIAL || task.getState() > Task.STATE_ERROR) {
 						throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(task.getState()), task.getTaskName()});
 					}
 				}
@@ -241,7 +255,7 @@ public class AssignmentService {
 		}
 	}
 	
-    public Assignment updateAllAttributesById(String id, Assignment updateAssignment) throws AssignmentAccessException {
+    public Assignment updateAllAttributesById(String id, Assignment updateAssignment) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
     	Assignment oldAssignment = findById(id);
     	
 		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
@@ -254,14 +268,14 @@ public class AssignmentService {
 		oldAssignment.setUser(updateAssignment.getUser());
 		oldAssignment.setTasks(updateAssignment.getTasks());
     		
-		assignmentRepository.save(oldAssignment);
+		save(oldAssignment);
     	return oldAssignment;
     }
     
     private boolean checkInspectionObjectExists(Assignment assignment) {
     	if(assignment.getInspectionObject() != null) {
 			try {
-				inspectionObjectService.findById(assignment.getInspectionObject().getId());
+				inspectionObjectService.findById(assignment.getInspectionObject().getId(), false);
 				return true;
 			} catch (InspectionObjectAccessException e) {
 				return false;
@@ -280,5 +294,18 @@ public class AssignmentService {
     	} else {
     		return false;
     	}
+    }
+    
+    private List<Assignment> filterByLoginUser(List<Assignment> assignments) {
+    	User currentUser = userService.getCurrentUser();
+    	
+    	if(currentUser != null) {
+	    	for (int i = 0; i < assignments.size(); i++) {
+	    		if(assignments.get(i).getUser().getId() != currentUser.getId()) {
+	    			assignments.remove(i);
+	    		}
+			}
+    	}
+    	return assignments;
     }
 }
