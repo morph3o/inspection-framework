@@ -18,6 +18,7 @@ import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.InspectionObjectAccessException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
+import com.insframe.server.model.Attachment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.Task;
 import com.insframe.server.model.User;
@@ -117,21 +118,21 @@ public class AssignmentService {
 	
 	public void deleteAssignmentById(String id) throws AssignmentAccessException{
 		Assignment queriedAssignment = findById(id);
-		gridFsService.deleteFileList(queriedAssignment.getAttachmentIds());
+		gridFsService.deleteFileList(queriedAssignment.listAttachmentIds());
 		assignmentRepository.delete(id);
 	}
 
 	public void deleteAll() throws AssignmentAccessException{
 		List<Assignment> queriedAssignments = findAll();
 		for (Assignment assignment : queriedAssignments) {
-			gridFsService.deleteFileList(assignment.getAttachmentIds());
+			gridFsService.deleteFileList(assignment.listAttachmentIds());
 		}
 		assignmentRepository.deleteAll();
 	}
 
 	public void deleteAttachment(String assignmentId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
-		List<String> attachmentIds = assignment.getAttachmentIds();
+		List<String> attachmentIds = assignment.listAttachmentIds();
 		for (int i = 0; i < attachmentIds.size(); i++) {
 			String assignedAttachmentId = attachmentIds.get(i);
 			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
@@ -157,7 +158,7 @@ public class AssignmentService {
 	
 	public void deleteAllAttachments(String assignmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
-		List<String> attachmentIds = assignment.getAttachmentIds();
+		List<String> attachmentIds = assignment.listAttachmentIds();
 		gridFsService.deleteFileList(attachmentIds);
 		attachmentIds.clear();
 		save(assignment);
@@ -191,10 +192,10 @@ public class AssignmentService {
 			if(checkUserExists(assignment) == false) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_INSP_OBJECT_REF_TEXT_ID,new String[]{});
 			}
-			if(assignment.getAttachmentIds() == null) {
-				assignment.setAttachmentIds(new ArrayList<String>());
+			if(assignment.listAttachmentIds() == null) {
+				assignment.setAttachments(new ArrayList<Attachment>());
 			}
-			if(gridFsService.checkAttachmentsExist(assignment.getAttachmentIds()) == false) {
+			if(gridFsService.checkAttachmentsExist(assignment.listAttachmentIds()) == false) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
 			}
 		} else {
@@ -210,7 +211,7 @@ public class AssignmentService {
 			if (assignment.getEndDate() != null) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"endDate"});
 			}
-			if (assignment.getAttachmentIds() != null) {
+			if (assignment.listAttachmentIds() != null) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
 			}
 		}
@@ -273,7 +274,6 @@ public class AssignmentService {
 	    		oldAssignment.setState(updateAssignment.getState());
 	    		oldAssignment.setStartDate(updateAssignment.getStartDate());
 	    		oldAssignment.setEndDate(updateAssignment.getEndDate());
-	    		oldAssignment.setAttachmentIds(updateAssignment.getAttachmentIds());
 	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
 	    		oldAssignment.setUser(updateAssignment.getUser());
 	    		oldAssignment.setTasks(updateAssignment.getTasks());
