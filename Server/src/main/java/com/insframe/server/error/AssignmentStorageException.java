@@ -15,6 +15,7 @@ public class AssignmentStorageException extends
 	public static final String DUPLICATE_KEY_NAME = "error.assignment.duplicate.name";
 	public static final String UPDATED_VERSION_AVAILABLE = "error.assignment.updated.version.available";
 	public static final String INVALID_USER_TO_MODIFY_ASSIGNMENT = "error.assignment.invalid.user.to.modify";
+	public static final String ASSIGNMENT_FINISHED = "error.assignment.finished";
 
 	public AssignmentStorageException(String textId, String[] args) {
 		super(textId, args);
