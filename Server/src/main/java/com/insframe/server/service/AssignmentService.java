@@ -253,23 +253,25 @@ public class AssignmentService {
     public Assignment updateAllAttributesById(String id, Assignment updateAssignment, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
     	if(checkValidAssignmentOwner(updateAssignment)){
     		Assignment oldAssignment = findById(id);
-        	
-    		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
-    		oldAssignment.setDescription(updateAssignment.getDescription());
-    		oldAssignment.setState(updateAssignment.getState());
-    		oldAssignment.setStartDate(updateAssignment.getStartDate());
-    		oldAssignment.setEndDate(updateAssignment.getEndDate());
-    		oldAssignment.setAttachmentIds(updateAssignment.getAttachmentIds());
-    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
-    		oldAssignment.setUser(updateAssignment.getUser());
-    		oldAssignment.setTasks(updateAssignment.getTasks());
-    		if(checkAssignmentVersion(oldAssignment, updateAssignment) || overwrite){
-    			oldAssignment.setVersion(oldAssignment.getVersion()+1);
-    			this.save(oldAssignment);
-    		} else {
-    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE, new String[]{updateAssignment.getAssignmentName()});
+    		if(oldAssignment.getState() != Assignment.STATE_FINISHED || SecurityTools.currentUserHasAuthority("ROLE_ADMIN")){
+	    		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
+	    		oldAssignment.setDescription(updateAssignment.getDescription());
+	    		oldAssignment.setState(updateAssignment.getState());
+	    		oldAssignment.setStartDate(updateAssignment.getStartDate());
+	    		oldAssignment.setEndDate(updateAssignment.getEndDate());
+	    		oldAssignment.setAttachmentIds(updateAssignment.getAttachmentIds());
+	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
+	    		oldAssignment.setUser(updateAssignment.getUser());
+	    		oldAssignment.setTasks(updateAssignment.getTasks());
+	    		if(checkAssignmentVersion(oldAssignment, updateAssignment) || overwrite){
+	    			oldAssignment.setVersion(oldAssignment.getVersion()+1);
+	    			this.save(oldAssignment);
+	    		} else {
+	    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE, new String[]{updateAssignment.getAssignmentName()});
+	    		}
+	    		return oldAssignment;
     		}
-    		return oldAssignment;
+    		throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_FINISHED, new String[]{oldAssignment.getAssignmentName()});
     	} else {
     		throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_TO_MODIFY_ASSIGNMENT, new String[]{updateAssignment.getAssignmentName()});
     	}
