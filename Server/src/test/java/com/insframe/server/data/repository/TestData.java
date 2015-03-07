@@ -12,7 +12,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.insframe.server.config.WebAppConfigurationAware;
+import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.AssignmentStorageException;
+import com.insframe.server.error.InspectionObjectAccessException;
 import com.insframe.server.error.InspectionObjectStorageException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.error.UserStorageException;
@@ -38,7 +40,7 @@ public class TestData extends WebAppConfigurationAware{
 	private GridFsService gridFsService;
 	
 	@Before
-	public void init() throws UserStorageException, FileNotFoundException, AssignmentStorageException, UserAccessException, InspectionObjectStorageException{
+	public void init() throws UserStorageException, FileNotFoundException, AssignmentStorageException, UserAccessException, InspectionObjectStorageException, InspectionObjectAccessException, AssignmentAccessException{
 		
 		/**
 		 * Clean all the documents of the database

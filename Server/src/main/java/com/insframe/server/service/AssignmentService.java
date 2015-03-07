@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -63,7 +64,7 @@ public class AssignmentService {
 
 	public Assignment findById(String id) throws AssignmentAccessException{
     	Assignment queriedAssignment = assignmentRepository.findById(id);
-    	if(queriedAssignment == null) {
+    	if(queriedAssignment == null || checkValidAssignmentOwner(queriedAssignment) == false) {
     		throw new AssignmentAccessException(AssignmentAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
     	}
     	return queriedAssignment;
@@ -79,7 +80,7 @@ public class AssignmentService {
 
 	public Assignment findByAssignmentName(String assignmentName) throws AssignmentAccessException {
 		Assignment queriedAssignment = assignmentRepository.findByAssignmentName(assignmentName);
-		if(queriedAssignment == null) {
+		if(queriedAssignment == null || checkValidAssignmentOwner(queriedAssignment) == false) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_BY_NAME_TEXT_ID,new String[]{});
 		}
 		return queriedAssignment;
@@ -120,7 +121,11 @@ public class AssignmentService {
 		assignmentRepository.delete(id);
 	}
 
-	public void deleteAll(){
+	public void deleteAll() throws AssignmentAccessException{
+		List<Assignment> queriedAssignments = findAll();
+		for (Assignment assignment : queriedAssignments) {
+			gridFsService.deleteFileList(assignment.getAttachmentIds());
+		}
 		assignmentRepository.deleteAll();
 	}
 
@@ -241,7 +246,7 @@ public class AssignmentService {
 
 		try {
 			return assignmentRepository.save(assignment);	
-		} catch (Exception e) {
+		} catch (DuplicateKeyException e) {
 			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
 			if(assignment.getId() == null) {
 				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME,new String[]{assignment.getAssignmentName()});
@@ -330,12 +335,14 @@ public class AssignmentService {
     }
         
     private List<Assignment> filterByLoginUser(List<Assignment> assignments) {
+    	//TODO: Remove that check for the current User. A user should always be logged in!
     	User currentUser = userService.getCurrentUser();
     	
     	if(currentUser != null) {
 	    	for (int i = 0; i < assignments.size(); i++) {
-	    		if(assignments.get(i).getUser().getId() != currentUser.getId()) {
+	    		if(checkValidAssignmentOwner(assignments.get(i)) == false) {
 	    			assignments.remove(i);
+	    			i = i - 1;
 	    		}
 			}
     	}

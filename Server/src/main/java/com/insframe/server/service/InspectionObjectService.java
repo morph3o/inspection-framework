@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Repository;
 
@@ -76,8 +77,7 @@ public class InspectionObjectService {
 	}
 	
     public InspectionObject save(InspectionObject inspectionObject) throws InspectionObjectStorageException {
-		if(inspectionObject.getObjectName() == null
-				|| inspectionObject.getObjectName() == "") {
+		if(inspectionObject.getObjectName() == null || inspectionObject.getObjectName() == "") {
 				throw new InspectionObjectStorageException(InspectionObjectStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"objectName"});
 		}
 		
@@ -90,7 +90,7 @@ public class InspectionObjectService {
 		
 		try {
 			return inspectionObjectRepository.save(inspectionObject);
-		} catch (Exception e) {
+		} catch (DuplicateKeyException e) {
 			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
 			if(inspectionObject.getId() == null) {
 				throw new InspectionObjectStorageException(InspectionObjectStorageException.DUPLICATE_KEY_NAME,new String[]{inspectionObject.getObjectName()});
@@ -100,8 +100,14 @@ public class InspectionObjectService {
 		}
 	}
 
-	public void deleteAll(){
+	public void deleteAll() throws InspectionObjectAccessException{
     	// TODO: make sure that also the attachments are deleted!
+		List<InspectionObject> queriedInspectionObjects = findAll(false);
+		if(queriedInspectionObjects != null) {
+			for (InspectionObject inspectionObject : queriedInspectionObjects) {
+				gridFsService.deleteFileList(inspectionObject.listAttachmentIds());
+			}
+		}
     	inspectionObjectRepository.deleteAll();
     }
     

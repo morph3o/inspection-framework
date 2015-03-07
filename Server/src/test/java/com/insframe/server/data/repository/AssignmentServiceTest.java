@@ -42,7 +42,7 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 	private GridFsService gridFsService;
 	
 	@Before
-	public void init() throws FileNotFoundException, AssignmentStorageException, InspectionObjectAccessException, UserAccessException, UserStorageException, InspectionObjectStorageException{
+	public void init() throws FileNotFoundException, AssignmentStorageException, InspectionObjectAccessException, UserAccessException, UserStorageException, InspectionObjectStorageException, AssignmentAccessException{
 		assignmentService.deleteAll();
 		assignmentService.save(new Assignment("Check University of Mannheim", "Go to the university of Mannheim and perform the needed checks.", true));
 		
