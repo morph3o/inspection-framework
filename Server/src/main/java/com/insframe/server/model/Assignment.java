@@ -28,7 +28,6 @@ public class Assignment {
 	private List<Task> tasks;
 	private Date startDate;
 	private Date endDate;
-//	private List<String> attachmentIds;
 	private List<Attachment> attachments;
 	@DBRef
 	private User user;
@@ -92,13 +91,6 @@ public class Assignment {
 				+ ", inspectionObject=" + inspectionObject + " attachments="
 				+ attachments + "]";
 	}
-
-//	public void addAttachment(String gridFsId) {
-//		if (attachmentIds == null) {
-//			attachmentIds = new ArrayList<String>();
-//		}
-//		attachmentIds.add(gridFsId);
-//	}
 
 	public String getDescription() {
 		return description;
@@ -183,14 +175,6 @@ public class Assignment {
 		this.inspectionObject = inspectionObject;
 	}
 
-//	public List<String> getAttachmentIds() {
-//		return attachmentIds;
-//	}
-//
-//	public void setAttachmentIds(List<String> attachmentIds) {
-//		this.attachmentIds = attachmentIds;
-//	}
-	
 	public List<String> listAttachmentIds() {
 		List<String> attachmentIds = new ArrayList<String>();
 		for (Attachment attachment : attachments) {

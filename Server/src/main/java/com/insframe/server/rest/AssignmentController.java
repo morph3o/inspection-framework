@@ -38,28 +38,32 @@ public class AssignmentController {
 	private MailService mailService;
 
 	@RequestMapping(method=RequestMethod.GET)
-    public List<Assignment> getAssignments(@RequestParam(value = "user_id", required=false) String userId) throws AssignmentAccessException {
+    public List<Assignment> getAssignments(@RequestParam(value = "user_id", required=false) String userId,
+    										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException {
 		if(userId != null) {
-			return assignmentService.findByUserId(userId);
+			return assignmentService.findByUserId(userId, addAttachmentDetails);
 		} else {
-			return assignmentService.findAll();
+			return assignmentService.findAll(addAttachmentDetails);
 		}
     }
 	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.GET)
-	public Assignment getAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
-		return assignmentService.findById(assignmentId);
+	public Assignment getAssignmentById(@PathVariable("assignmentId") String assignmentId,
+										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException {
+		return assignmentService.findById(assignmentId, addAttachmentDetails);
 	}
 	
 	@RequestMapping(value="/{assignmentId}/task", method=RequestMethod.GET)
-	public List<Task> getAssignmentTasks(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException {
-		return assignmentService.findById(assignmentId).getTasks();
+	public List<Task> getAssignmentTasks(@PathVariable("assignmentId") String assignmentId,
+										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException {
+		return assignmentService.findById(assignmentId, addAttachmentDetails).getTasks();
 	}
 	
 	@RequestMapping(value="/{assignmentId}/task/{taskId}", method=RequestMethod.GET)
 	public Task getAssignmentTask(@PathVariable("assignmentId") String assignmentId,
-							  		@PathVariable("taskId") String taskId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
-		return assignmentService.findTaskById(assignmentId, taskId);
+							  	@PathVariable("taskId") String taskId,
+							  	@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+		return assignmentService.findTaskById(assignmentId, taskId, addAttachmentDetails);
 	}
 
 	@RequestMapping(method=RequestMethod.POST)

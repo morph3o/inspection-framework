@@ -125,14 +125,14 @@ public class InspectionObjectService {
 		oldInspectionObject.setDescription(updateInspectionObject.getDescription());
 		oldInspectionObject.setLocation(updateInspectionObject.getLocation());
 		
-		this.save(oldInspectionObject);
+		save(oldInspectionObject);
     	return oldInspectionObject;
     }
     
     public void addAttachmentToInspectionObject(String inspectionObjectId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws InspectionObjectAccessException, InspectionObjectStorageException {
 		InspectionObject inspectionObject = findById(inspectionObjectId, false);
 		inspectionObject.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
-		this.save(inspectionObject);
+		save(inspectionObject);
 	}
     
 	public void deleteAttachment(String inspectionObjectId, String attachmentId) throws InspectionObjectAccessException, InspectionObjectStorageException {

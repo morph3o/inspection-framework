@@ -1,7 +1,6 @@
 package com.insframe.server.model;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class Task {
@@ -14,7 +13,7 @@ public class Task {
 	private String description;
 	private String errorDescription;
 	private Integer state;
-	private List<String> attachmentIds;
+	private List<Attachment> attachments;
 
 	public Task() {
 		super();
@@ -64,19 +63,27 @@ public class Task {
 		this.id = id;
 	}
 	
-	public List<String> getAttachmentIds() {
+	public List<String> listAttachmentIds() {
+		List<String> attachmentIds = new ArrayList<String>();
+		for (Attachment attachment : attachments) {
+			attachmentIds.add(attachment.getGridFsId());
+		}
 		return attachmentIds;
 	}
+	
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
 
-	public void setAttachmentIds(List<String> attachmentIds) {
-		this.attachmentIds = attachmentIds;
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
 	}
 	
 	public void addAttachment(String gridFsId) {
-		if(attachmentIds == null){
-			attachmentIds = new ArrayList<String>();
+		if(attachments == null){
+			attachments = new ArrayList<Attachment>();
 		}
-		attachmentIds.add(gridFsId);
+		attachments.add(new Attachment(gridFsId));
 	}
 
 	public String getErrorDescription() {
