@@ -36,6 +36,8 @@ public class Assignment {
 	private User user;
 	@DBRef
 	private InspectionObject inspectionObject;
+	
+	private Integer version;
 
 	public Assignment() {
 		super();
@@ -197,5 +199,13 @@ public class Assignment {
 
 	public void setState(Integer state) {
 		this.state = state;
+	}
+
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
 }
