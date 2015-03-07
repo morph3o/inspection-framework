@@ -7,6 +7,8 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.AssignmentRepository;
@@ -17,6 +19,9 @@ import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.Task;
+import com.insframe.server.model.User;
+import com.insframe.server.security.CustomUserDetails;
+import com.insframe.server.tools.SecurityTools;
 
 @Repository
 public class AssignmentService {
@@ -203,6 +208,10 @@ public class AssignmentService {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(assignment.getState())});
 			}
 		}
+		
+		if(assignment.getVersion() == null){
+			assignment.setVersion(0);
+		}
 
 		if(assignment.getTasks() == null) {
 			assignment.setTasks(new ArrayList<Task>());
@@ -214,7 +223,7 @@ public class AssignmentService {
 				if(task.getState() == null) {
 					task.setState(Task.STATE_OKAY);
 				} else {
-					if(task.getState() < Task.STATE_OKAY || task.getState() > Task.STATE_OKAY) {
+					if(task.getState() < Task.STATE_INITIAL || task.getState() > Task.STATE_ERROR) {
 						throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(task.getState()), task.getTaskName()});
 					}
 				}
@@ -237,25 +246,54 @@ public class AssignmentService {
 		if(assignment.getId() == null) {
 			return save(assignment);
 		} else {
-			return updateAllAttributesById(assignment.getId(), assignment);
+			return updateAllAttributesById(assignment.getId(), assignment, false);
 		}
 	}
 	
-    public Assignment updateAllAttributesById(String id, Assignment updateAssignment) throws AssignmentAccessException {
-    	Assignment oldAssignment = findById(id);
-    	
-		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
-		oldAssignment.setDescription(updateAssignment.getDescription());
-		oldAssignment.setState(updateAssignment.getState());
-		oldAssignment.setStartDate(updateAssignment.getStartDate());
-		oldAssignment.setEndDate(updateAssignment.getEndDate());
-		oldAssignment.setAttachmentIds(updateAssignment.getAttachmentIds());
-		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
-		oldAssignment.setUser(updateAssignment.getUser());
-		oldAssignment.setTasks(updateAssignment.getTasks());
-    		
-		assignmentRepository.save(oldAssignment);
-    	return oldAssignment;
+    public Assignment updateAllAttributesById(String id, Assignment updateAssignment, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+    	if(checkValidAssignmentOwner(updateAssignment)){
+    		Assignment oldAssignment = findById(id);
+        	
+    		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
+    		oldAssignment.setDescription(updateAssignment.getDescription());
+    		oldAssignment.setState(updateAssignment.getState());
+    		oldAssignment.setStartDate(updateAssignment.getStartDate());
+    		oldAssignment.setEndDate(updateAssignment.getEndDate());
+    		oldAssignment.setAttachmentIds(updateAssignment.getAttachmentIds());
+    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
+    		oldAssignment.setUser(updateAssignment.getUser());
+    		oldAssignment.setTasks(updateAssignment.getTasks());
+    		if(checkAssignmentVersion(oldAssignment, updateAssignment) || overwrite){
+    			oldAssignment.setVersion(oldAssignment.getVersion()+1);
+    			this.save(oldAssignment);
+    		} else {
+    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE, new String[]{updateAssignment.getAssignmentName()});
+    		}
+    		return oldAssignment;
+    	} else {
+    		throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_TO_MODIFY_ASSIGNMENT, new String[]{updateAssignment.getAssignmentName()});
+    	}
+    }
+    
+    private boolean checkValidAssignmentOwner(Assignment assignment){
+    	final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    	if (authentication.getPrincipal() instanceof CustomUserDetails) {
+			User u = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+			if(assignment.getUser().getUserName().equals(u.getUserName()) || SecurityTools.hasAuthority((CustomUserDetails) authentication.getPrincipal(), "ROLE_ADMIN")){
+				return true;
+			}
+		}
+    	return false;
+    }
+    
+    private boolean checkAssignmentVersion(Assignment oldAssignment, Assignment updatedAssignment){
+    	if(oldAssignment != null && updatedAssignment != null){
+    		if(oldAssignment.getVersion() == updatedAssignment.getVersion()){
+    			return true;
+    		}
+    		return false;
+    	}
+    	return false;
     }
     
     private boolean checkInspectionObjectExists(Assignment assignment) {

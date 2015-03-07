@@ -5,8 +5,9 @@ import java.util.Date;
 import java.util.List;
 
 public class Task {
-	public static final Integer STATE_OKAY = 0;
-	public static final Integer STATE_ERROR = 1;
+	public static final Integer STATE_INITIAL = 0;
+	public static final Integer STATE_OKAY = 1;
+	public static final Integer STATE_ERROR = 2;
 	
 	private String id;
 	private String taskName;

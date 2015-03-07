@@ -22,17 +22,21 @@ import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.Task;
+import com.insframe.server.model.User;
 import com.insframe.server.service.AssignmentService;
 import com.insframe.server.service.GridFsService;
+import com.insframe.server.service.MailService;
 
 @RestController
 @RequestMapping("/assignment")
 public class AssignmentController {
-	@Autowired
-	private AssignmentService assignmentService;
 	
 	@Autowired
+	private AssignmentService assignmentService;
+	@Autowired
 	private GridFsService gridFsService;
+	@Autowired
+	private MailService mailService;
 
 	@RequestMapping(method=RequestMethod.GET)
     public List<Assignment> getAssignments(@RequestParam(value = "user_id", required=false) String userId) throws AssignmentAccessException {
@@ -55,6 +59,11 @@ public class AssignmentController {
 
 	@RequestMapping(method=RequestMethod.POST)
 	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
+//		if(assignment.getUser() != null){
+//			User user = assignment.getUser();
+//			mailService.sendEmail(user.getEmailAddress(), "You have a new assignment", "You have a new assignment");
+//		}
+//		mailService.sendEmailToAdmins("New assignment created", "The following assignment was created: "+assignment.getAssignmentName());
 		return assignmentService.createAssignment(assignment);
 	}
 	
@@ -67,8 +76,14 @@ public class AssignmentController {
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.PUT)
 	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void updateAssignmentByID(@PathVariable("assignmentId") String assignmentId,
-										@RequestBody Assignment assignment) throws AssignmentAccessException {
-		assignmentService.updateAllAttributesById(assignmentId, assignment);
+									 @RequestBody Assignment assignment,
+									 @RequestParam(value = "overwrite", required = false) boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+//		if(assignment.getUser() != null){
+//			User user = assignment.getUser();
+//			mailService.sendEmail(user.getEmailAddress(), "You have a new assignment", "The assignment '"+assignment.getAssignmentName()+"' was assigned to you.");
+//		}
+//		mailService.sendEmailToAdmins("An assignment was modified", "The following assignment was modified: "+assignment.getAssignmentName());
+		assignmentService.updateAllAttributesById(assignmentId, assignment, overwrite);
 	}
 	
 	
