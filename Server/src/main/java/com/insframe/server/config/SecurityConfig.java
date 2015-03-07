@@ -14,7 +14,7 @@ import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.insframe.server.rest.UserController;
+import com.insframe.server.security.CustomLogoutSuccessHandler;
 import com.insframe.server.security.RestAuthenticationAccessDeniedHandler;
 import com.insframe.server.security.RestAuthenticationEntryPoint;
 import com.insframe.server.security.RestAuthenticationFailureHandler;
@@ -37,6 +37,8 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private RestAuthenticationAccessDeniedHandler accessDeniedHandler;
 	@Autowired
 	private RestAuthenticationFailureHandler failureHandler;
+	@Autowired
+	private CustomLogoutSuccessHandler logoutHandler;
 
     @Bean
     public TokenBasedRememberMeServices rememberMeServices() {
@@ -86,6 +88,8 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
             .logout()
             	.permitAll()
             	.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+            	.deleteCookies("JSESSIONID")
+            	.logoutSuccessHandler(logoutHandler)
             	.and()
             .sessionManagement()
             .maximumSessions(10);
