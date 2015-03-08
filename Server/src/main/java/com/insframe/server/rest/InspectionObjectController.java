@@ -39,21 +39,16 @@ public class InspectionObjectController {
 		}
     }
 	
+	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.GET)
+	public InspectionObject getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId,
+													@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws InspectionObjectAccessException {
+		return inspectionObjectService.findById(inspectionObjectId, addAttachmentDetails);
+	}
+
 	@RequestMapping(method=RequestMethod.POST)
 	public InspectionObject createInspectionObject(@RequestBody InspectionObject inspectionObject) throws InspectionObjectStorageException {
 		InspectionObject savedInspectionObject = inspectionObjectService.save(inspectionObject);
 		return savedInspectionObject;
-	}
-	
-	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.DELETE)
-	@ResponseStatus(value=HttpStatus.NO_CONTENT)
-	public void deleteInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
-		inspectionObjectService.deleteInspectionObjectByID(inspectionObjectId);
-	}
-	
-	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.GET)
-	public InspectionObject getInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
-		return inspectionObjectService.findById(inspectionObjectId);
 	}
 	
 	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.PUT)
@@ -62,9 +57,21 @@ public class InspectionObjectController {
 										 	@RequestBody InspectionObject inspectionObject) throws InspectionObjectAccessException, InspectionObjectStorageException {
 		inspectionObjectService.updateById(inspectionObjectId, inspectionObject);
 	}
+
+	@RequestMapping(value="/{inspectionObjectId}", method=RequestMethod.DELETE)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
+	public void deleteInspectionObjectByID(@PathVariable("inspectionObjectId") String inspectionObjectId) throws InspectionObjectAccessException {
+		inspectionObjectService.deleteInspectionObjectByID(inspectionObjectId);
+	}
 	
+	@RequestMapping(value="/{inspectionObjectId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
+	public void deleteInspectionObjectAttachment(@PathVariable("inspectionObjectId") String inspectionObjectId,
+											@PathVariable("attachmentId") String attachmentId) throws InspectionObjectAccessException, UserAccessException, InspectionObjectStorageException {
+		inspectionObjectService.deleteAttachment(inspectionObjectId, attachmentId);
+	}
+
 	@RequestMapping(value="/{inspectionObjectId}/attachment", method=RequestMethod.POST)
-	public void addAttachmentToAssignment(@PathVariable("inspectionObjectId") String inspectionObjectId,
+	public void addAttachmentToInspectionObject(@PathVariable("inspectionObjectId") String inspectionObjectId,
 									@RequestParam("fileUpload") List<MultipartFile> fileList,
 									@RequestParam(value = "fileDescription", required = false) List<String> descriptionList)
 								 throws InspectionObjectAccessException, IOException, FileUploadException, InspectionObjectStorageException {
@@ -87,11 +94,5 @@ public class InspectionObjectController {
 	        	throw new FileUploadException(FileUploadException.EMPTY_FILE_UPLOAD_TEXT_ID,new String[]{});
 	        }
 		}
-	}
-	
-	@RequestMapping(value="/{inspectionObjectId}/attachment/{attachmentId}", method=RequestMethod.DELETE)
-	public void deleteInspectionObjectAttachment(@PathVariable("inspectionObjectId") String inspectionObjectId,
-											@PathVariable("attachmentId") String attachmentId) throws InspectionObjectAccessException, UserAccessException, InspectionObjectStorageException {
-		inspectionObjectService.deleteAttachment(inspectionObjectId, attachmentId);
 	}
 }

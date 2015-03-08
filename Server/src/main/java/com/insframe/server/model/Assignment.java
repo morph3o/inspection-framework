@@ -23,11 +23,12 @@ public class Assignment {
 	private String assignmentName;
 	private String description;
 	private Boolean isTemplate;
+	private Boolean hasError;
 	private Integer state;
 	private List<Task> tasks;
 	private Date startDate;
 	private Date endDate;
-	private List<String> attachmentIds;
+	private List<Attachment> attachments;
 	@DBRef
 	private User user;
 	@DBRef
@@ -66,7 +67,7 @@ public class Assignment {
 	public Assignment(String assignmentName, String description,
 			Boolean isTemplate, Integer state, List<Task> tasks,
 			Date startDate, Date endDate, User user,
-			InspectionObject inspectionObject, List<String> attachmentIds) {
+			InspectionObject inspectionObject, List<Attachment> attachments) {
 		super();
 		this.assignmentName = assignmentName;
 		this.description = description;
@@ -77,7 +78,7 @@ public class Assignment {
 		this.endDate = endDate;
 		this.user = user;
 		this.inspectionObject = inspectionObject;
-		this.attachmentIds = attachmentIds;
+		this.attachments = attachments;
 	}
 
 	@Override
@@ -88,14 +89,7 @@ public class Assignment {
 				+ ", tasks=" + tasks + ", startDate=" + startDate
 				+ ", endDate=" + endDate + ", user=" + user
 				+ ", inspectionObject=" + inspectionObject + " attachments="
-				+ attachmentIds + "]";
-	}
-
-	public void addAttachment(String gridFsId) {
-		if (attachmentIds == null) {
-			attachmentIds = new ArrayList<String>();
-		}
-		attachmentIds.add(gridFsId);
+				+ attachments + "]";
 	}
 
 	public String getDescription() {
@@ -135,9 +129,11 @@ public class Assignment {
 	}
 
 	public Task getTask(String id) {
-		for (Task task : tasks) {
-			if (task.getId().equals(id)) {
-				return task;
+		if(tasks != null) {
+			for (Task task : tasks) {
+				if (task.getId().equals(id)) {
+					return task;
+				}
 			}
 		}
 		return null;
@@ -179,12 +175,27 @@ public class Assignment {
 		this.inspectionObject = inspectionObject;
 	}
 
-	public List<String> getAttachmentIds() {
+	public List<String> listAttachmentIds() {
+		List<String> attachmentIds = new ArrayList<String>();
+		for (Attachment attachment : attachments) {
+			attachmentIds.add(attachment.getGridFsId());
+		}
 		return attachmentIds;
 	}
+	
+	public List<Attachment> getAttachments() {
+		return attachments;
+	}
 
-	public void setAttachmentIds(List<String> attachmentIds) {
-		this.attachmentIds = attachmentIds;
+	public void setAttachments(List<Attachment> attachments) {
+		this.attachments = attachments;
+	}
+	
+	public void addAttachment(String gridFsId) {
+		if(attachments == null){
+			attachments = new ArrayList<Attachment>();
+		}
+		attachments.add(new Attachment(gridFsId));
 	}
 	
 	public Integer getState() {
@@ -201,5 +212,13 @@ public class Assignment {
 
 	public void setVersion(Integer version) {
 		this.version = version;
+	}
+
+	public Boolean getHasError() {
+		return hasError;
+	}
+
+	public void setHasError(Boolean hasError) {
+		this.hasError = hasError;
 	}
 }

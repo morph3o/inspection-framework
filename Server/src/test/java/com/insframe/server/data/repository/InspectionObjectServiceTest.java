@@ -19,7 +19,7 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 	private InspectionObjectService inspectionObjectService;
 	
 	@Before
-	public void init() throws InspectionObjectStorageException{
+	public void init() throws InspectionObjectStorageException, InspectionObjectAccessException{
 		inspectionObjectService.deleteAll();
 		inspectionObjectService.save(new InspectionObject("University of Mannheim", "The university of Mannheim", "Mannheim", "Studentenwerk Mannheim"));
 		inspectionObjectService.save(new InspectionObject("Montpellier bridge", "Montpellier bridge in Heidelberg", "Heidelberg", "City of Heidelberg"));
@@ -44,9 +44,9 @@ public class InspectionObjectServiceTest extends WebAppConfigurationAware {
 		System.out.println("****** Should Delete InspectionObject by ID ******");
 		System.out.println("Now the first returned inspection object will be deleted.");
 		List<InspectionObject> inspectionObjectList = inspectionObjectService.findAll(false);
-		Assert.assertNotNull(inspectionObjectService.findById(inspectionObjectList.get(0).getId()));
+		Assert.assertNotNull(inspectionObjectService.findById(inspectionObjectList.get(0).getId(), false));
 		inspectionObjectService.deleteInspectionObjectByID(inspectionObjectList.get(0).getId());
-		Assert.assertNull(inspectionObjectService.findById(inspectionObjectList.get(0).getId()));
+		Assert.assertNull(inspectionObjectService.findById(inspectionObjectList.get(0).getId(), false));
 		inspectionObjectList = inspectionObjectService.findAll(false);
 		Assert.assertTrue(inspectionObjectList.size() == 3);
 		System.out.println("First inspection object was deleted.");

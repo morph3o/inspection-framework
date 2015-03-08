@@ -2,10 +2,12 @@ package com.insframe.server.service;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +19,9 @@ import com.insframe.server.error.AssignmentStorageException;
 import com.insframe.server.error.InspectionObjectAccessException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
+import com.insframe.server.model.Attachment;
 import com.insframe.server.model.FileMetaData;
+import com.insframe.server.model.InspectionObject;
 import com.insframe.server.model.Task;
 import com.insframe.server.model.User;
 import com.insframe.server.security.CustomUserDetails;
@@ -37,20 +41,28 @@ public class AssignmentService {
 	@Autowired
 	UserService userService;
 	
-    public void addAttachmentToAssignment(String assignmentId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException {
+    public void addAttachmentToAssignment(String assignmentId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
-		assignment.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
-		assignmentRepository.save(assignment);
+		if(assignment.getIsTemplate() != true) {
+			assignment.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
+			save(assignment);
+		} else {
+			throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
+		}
 	}
     
-    public void addAttachmentToTask(String assignmentId, String taskId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException {
+    public void addAttachmentToTask(String assignmentId, String taskId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {   	
     	Assignment assignment = findById(assignmentId);
-    	Task task = assignment.getTask(taskId);
-		if(task != null) {
-			task.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
-			assignmentRepository.save(assignment);
+    	if(assignment.getIsTemplate() != true) {
+    		Task task = assignment.getTask(taskId);
+			if(task != null) {
+				task.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
+				save(assignment);
+			} else {
+				throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,new String[]{assignmentId, taskId});
+			}
 		} else {
-			throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,new String[]{assignmentId, taskId});
+			throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
 		}
 		
     }
@@ -60,29 +72,53 @@ public class AssignmentService {
     	assignment.getTasks().add(task);
     	save(assignment);
     }
-
-	public Assignment findById(String id) throws AssignmentAccessException{
-    	Assignment queriedAssignment = assignmentRepository.findById(id);
-    	if(queriedAssignment == null) {
-    		throw new AssignmentAccessException(AssignmentAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
-    	}
-    	return queriedAssignment;
-    }
-
-	public List<Assignment> findAll() throws AssignmentAccessException {
+    
+    public List<Assignment> findAll() throws AssignmentAccessException {
 		List<Assignment> assignments = assignmentRepository.findAll();
 		if(assignments == null) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
 		}
-		return assignments;
+		return filterByLoginUser(assignments);
+    }
+
+	public List<Assignment> findAll(Boolean addAttachmentDetails) throws AssignmentAccessException {
+		if(addAttachmentDetails) {
+			return addAttachmentDetails(findAll());
+		} else {
+			return findAll();
+		}
+	}
+
+	public Assignment findById(String id) throws AssignmentAccessException{
+		Assignment queriedAssignment = assignmentRepository.findById(id);
+		if(queriedAssignment == null || checkValidAssignmentOwner(queriedAssignment) == false) {
+			throw new AssignmentAccessException(AssignmentAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
+		}
+		return queriedAssignment;
+	}
+	
+	public Assignment findById(String id, Boolean addAttachmentDetails) throws AssignmentAccessException{
+		if(addAttachmentDetails) {
+			return addAttachmentDetails(findById(id));
+		} else {
+			return findById(id);
+		}
 	}
 
 	public Assignment findByAssignmentName(String assignmentName) throws AssignmentAccessException {
 		Assignment queriedAssignment = assignmentRepository.findByAssignmentName(assignmentName);
-		if(queriedAssignment == null) {
+		if(queriedAssignment == null || checkValidAssignmentOwner(queriedAssignment) == false) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_BY_NAME_TEXT_ID,new String[]{});
 		}
 		return queriedAssignment;
+	}
+	
+	public Assignment findByAssignmentName(String assignmentName, Boolean addAttachmentDetails) throws AssignmentAccessException {
+		if(addAttachmentDetails) {
+			return addAttachmentDetails(findByAssignmentName(assignmentName));
+		} else {
+			return findByAssignmentName(assignmentName);
+		}
 	}
 	
 	public List<Assignment> findByUserId(String userId) throws AssignmentAccessException {
@@ -90,7 +126,24 @@ public class AssignmentService {
 		if(assignments == null) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_TEXT_ID,new String[]{userId});
 		}
-		return assignments;
+		return filterByLoginUser(assignments);
+	}
+	
+	public List<Assignment> findByUserId(String userId, Boolean addAttachmentDetails) throws AssignmentAccessException {
+		if (addAttachmentDetails) {
+			return addAttachmentDetails(findByUserId(userId));
+		} else {
+			return findByUserId(userId);
+		}
+	}
+	
+	public Task findTaskById(String assignmentId, String taskId, Boolean addAttachmentDetails) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+		Task queriedTask = findById(assignmentId, addAttachmentDetails).getTask(taskId);
+		if(queriedTask != null) {
+			return queriedTask;
+		} else {
+			throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,new String[]{assignmentId, taskId});
+		}
 	}
 	
 	public void deleteTaskById(String assignmentId, String taskId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
@@ -98,7 +151,7 @@ public class AssignmentService {
 		List<Task> tasks = queriedAssignment.getTasks();
 		for (int i = 0; i < tasks.size(); i++) {
 			if(tasks.get(i).getId().equalsIgnoreCase(taskId)) {
-				gridFsService.deleteFileList(tasks.get(i).getAttachmentIds());
+				gridFsService.deleteFileList(tasks.get(i).listAttachmentIds());
 				tasks.remove(i);
 			}
 		}
@@ -107,17 +160,21 @@ public class AssignmentService {
 	
 	public void deleteAssignmentById(String id) throws AssignmentAccessException{
 		Assignment queriedAssignment = findById(id);
-		gridFsService.deleteFileList(queriedAssignment.getAttachmentIds());
+		gridFsService.deleteFileList(queriedAssignment.listAttachmentIds());
 		assignmentRepository.delete(id);
 	}
 
-	public void deleteAll(){
+	public void deleteAll() throws AssignmentAccessException{
+		List<Assignment> queriedAssignments = findAll();
+		for (Assignment assignment : queriedAssignments) {
+			gridFsService.deleteFileList(assignment.listAttachmentIds());
+		}
 		assignmentRepository.deleteAll();
 	}
 
 	public void deleteAttachment(String assignmentId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
-		List<String> attachmentIds = assignment.getAttachmentIds();
+		List<String> attachmentIds = assignment.listAttachmentIds();
 		for (int i = 0; i < attachmentIds.size(); i++) {
 			String assignedAttachmentId = attachmentIds.get(i);
 			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
@@ -130,7 +187,7 @@ public class AssignmentService {
 	
 	public void deleteAttachment(String assignmentId, String taskId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
-		List<String> attachmentIds = assignment.getTask(taskId).getAttachmentIds();
+		List<String> attachmentIds = assignment.getTask(taskId).listAttachmentIds();
 		for (int i = 0; i < attachmentIds.size(); i++) {
 			String assignedAttachmentId = attachmentIds.get(i);
 			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
@@ -143,7 +200,7 @@ public class AssignmentService {
 	
 	public void deleteAllAttachments(String assignmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
-		List<String> attachmentIds = assignment.getAttachmentIds();
+		List<String> attachmentIds = assignment.listAttachmentIds();
 		gridFsService.deleteFileList(attachmentIds);
 		attachmentIds.clear();
 		save(assignment);
@@ -156,7 +213,7 @@ public class AssignmentService {
 		
 		for (int i = 0; i < tasks.size(); i++) {
 			if(tasks.get(i).getId().equalsIgnoreCase(taskId)) {
-				attachmentIds = tasks.get(i).getAttachmentIds();
+				attachmentIds = tasks.get(i).listAttachmentIds();
 			}
 		}
 		gridFsService.deleteFileList(attachmentIds);
@@ -177,10 +234,10 @@ public class AssignmentService {
 			if(checkUserExists(assignment) == false) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_INSP_OBJECT_REF_TEXT_ID,new String[]{});
 			}
-			if(assignment.getAttachmentIds() == null) {
-				assignment.setAttachmentIds(new ArrayList<String>());
+			if(assignment.getAttachments() == null) {
+				assignment.setAttachments(new ArrayList<Attachment>());
 			}
-			if(gridFsService.checkAttachmentsExist(assignment.getAttachmentIds()) == false) {
+			if(gridFsService.checkAttachmentsExist(assignment.listAttachmentIds()) == false) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
 			}
 		} else {
@@ -196,15 +253,25 @@ public class AssignmentService {
 			if (assignment.getEndDate() != null) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"endDate"});
 			}
-			if (assignment.getAttachmentIds() != null) {
+			if (assignment.getAttachments() != null) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
 			}
+		}
+		
+		for (Task task : assignment.getTasks()) {
+			if(task.getState() == Task.STATE_ERROR) {
+				assignment.setHasError(true);
+			}
+		}
+		
+		if(assignment.getHasError() == null) {
+			assignment.setHasError(false);
 		}
 		
 		if(assignment.getState() == null) {
 			assignment.setState(Assignment.STATE_INITIAL);
 		} else {
-			if(assignment.getState() < 0 || assignment.getState() > 2) {
+			if(assignment.getState() < Assignment.STATE_INITIAL || assignment.getState() > Assignment.STATE_FINISHED) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(assignment.getState())});
 			}
 		}
@@ -220,6 +287,12 @@ public class AssignmentService {
 				if(task.getId() == null) {
 					task.setId(ObjectId.get().toString());
 				}
+				if(task.getAttachments() == null) {
+					task.setAttachments(new ArrayList<Attachment>());
+				}
+				if(task.getErrorDescription() == null) {
+					task.setErrorDescription("");
+				}
 				if(task.getState() == null) {
 					task.setState(Task.STATE_OKAY);
 				} else {
@@ -232,7 +305,7 @@ public class AssignmentService {
 
 		try {
 			return assignmentRepository.save(assignment);	
-		} catch (Exception e) {
+		} catch (DuplicateKeyException e) {
 			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
 			if(assignment.getId() == null) {
 				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME,new String[]{assignment.getAssignmentName()});
@@ -259,7 +332,6 @@ public class AssignmentService {
 	    		oldAssignment.setState(updateAssignment.getState());
 	    		oldAssignment.setStartDate(updateAssignment.getStartDate());
 	    		oldAssignment.setEndDate(updateAssignment.getEndDate());
-	    		oldAssignment.setAttachmentIds(updateAssignment.getAttachmentIds());
 	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
 	    		oldAssignment.setUser(updateAssignment.getUser());
 	    		oldAssignment.setTasks(updateAssignment.getTasks());
@@ -278,14 +350,27 @@ public class AssignmentService {
     }
     
     private boolean checkValidAssignmentOwner(Assignment assignment){
-    	final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    	if (authentication.getPrincipal() instanceof CustomUserDetails) {
-			User u = ((CustomUserDetails) authentication.getPrincipal()).getUser();
-			if(assignment.getUser().getUserName().equals(u.getUserName()) || SecurityTools.hasAuthority((CustomUserDetails) authentication.getPrincipal(), "ROLE_ADMIN")){
-				return true;
+    	//TODO: Remove that check for the current User later once security is enabled for assignment service.
+    	// 		A user should always be logged in!
+    	User currentUser = userService.getCurrentUser();
+    	
+    	if(currentUser != null) {
+	    	final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	    	if (authentication.getPrincipal() instanceof CustomUserDetails) {
+				User u = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+				if(assignment.getIsTemplate() || assignment.getUser() == null) {
+					if(SecurityTools.hasAuthority((CustomUserDetails) authentication.getPrincipal(), "ROLE_ADMIN")){
+						return true;
+					}
+				} else {
+					if(assignment.getUser().getUserName().equals(u.getUserName()) || SecurityTools.hasAuthority((CustomUserDetails) authentication.getPrincipal(), "ROLE_ADMIN")){
+						return true;
+					}
+				}
 			}
-		}
-    	return false;
+	    	return false;
+    	}
+    	return true;
     }
     
     private boolean checkAssignmentVersion(Assignment oldAssignment, Assignment updatedAssignment){
@@ -301,7 +386,7 @@ public class AssignmentService {
     private boolean checkInspectionObjectExists(Assignment assignment) {
     	if(assignment.getInspectionObject() != null) {
 			try {
-				inspectionObjectService.findById(assignment.getInspectionObject().getId());
+				inspectionObjectService.findById(assignment.getInspectionObject().getId(), false);
 				return true;
 			} catch (InspectionObjectAccessException e) {
 				return false;
@@ -320,5 +405,39 @@ public class AssignmentService {
     	} else {
     		return false;
     	}
+    }
+        
+    private List<Assignment> filterByLoginUser(List<Assignment> assignments) {
+    	//TODO: Remove that check for the current User later once security is enabled for assignment service.
+    	// 		A user should always be logged in!
+    	User currentUser = userService.getCurrentUser();
+    	
+    	if(currentUser != null) {
+	    	for (int i = 0; i < assignments.size(); i++) {
+	    		if(checkValidAssignmentOwner(assignments.get(i)) == false) {
+	    			assignments.remove(i);
+	    			i = i - 1;
+	    		}
+			}
+    	}
+    	return assignments;
+    }
+    
+    private List<Assignment> addAttachmentDetails(List<Assignment> assignments) {
+		for (Assignment assignment : assignments) {
+			gridFsService.addAttachmentDetails(assignment.getAttachments());
+			for (Task task : assignment.getTasks()) {
+				gridFsService.addAttachmentDetails(task.getAttachments());
+			}
+		}
+		return assignments;
+    }
+    
+    private Assignment addAttachmentDetails(Assignment assignment) {
+		gridFsService.addAttachmentDetails(assignment.getAttachments());
+		for (Task task : assignment.getTasks()) {
+			gridFsService.addAttachmentDetails(task.getAttachments());
+		}
+		return assignment;
     }
 }
