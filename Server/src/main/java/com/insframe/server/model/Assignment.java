@@ -35,11 +35,55 @@ public class Assignment {
 	private InspectionObject inspectionObject;
 	
 	private Integer version;
+	
+	public String toDescription(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("ID: "+this.id+"\n");
+		sb.append("Name: "+this.assignmentName+"\n");
+		sb.append("Description: "+this.description+"\n");
+		sb.append("Start Date: "+this.startDate+"\n");
+		sb.append("End Date: "+this.endDate+"\n");
+		sb.append("Inspection Object: "+this.inspectionObject.getObjectName()+"\n");
+		sb.append("Person assigned: "+this.getUser().getFirstName()+" "+this.getUser().getLastName()+"\n");
+		sb.append("Tasks: \n");
+		int i = 1;
+		for(Task t : this.tasks){
+			sb.append("\t"+ i + "- " + t.getTaskName() + "\n");
+			sb.append("\t    State: "+ t.getStateToString()+"\n");
+			if(t.getState() == Task.STATE_ERROR){
+				sb.append("\t\tError Description: \n");
+				sb.append("\t\t"+t.getErrorDescription());
+			}
+			if(t.getAttachments().size() != 0){
+				sb.append("\t    Attachments:\n");
+				for(Attachment a : t.getAttachments()){
+					sb.append("\t\tDescription: "+a.getDescription()+"\n");
+					sb.append("\t\tFile type: "+a.getFiletype()+"\n");
+					sb.append("\t\tUpload date: "+a.getUploadDate()+"\n");
+				}
+			}else{
+				sb.append("\t    No attachments for this task.\n");
+			}
+			i++;
+		}
+		if(this.getAttachments().size() != 0){
+			sb.append("Attachments: \n");
+			i = 1;
+			for(Attachment a : this.getAttachments()){
+				sb.append("\tDescription: "+a.getDescription()+"\n");
+				sb.append("\tFile type: "+a.getFiletype()+"\n");
+				sb.append("\tUpload date: "+a.getUploadDate()+"\n");
+			}
+		}else{
+			sb.append("No attachments for this assignment.");
+		}
+		return sb.toString();
+	}
 
 	public Assignment() {
 		super();
 	}
-
+	
 	public Assignment(String assignmentName, String description,
 			Boolean isTemplate) {
 		super();

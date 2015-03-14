@@ -2,11 +2,13 @@ package com.insframe.server.service;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.security.core.Authentication;
@@ -21,7 +23,6 @@ import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Assignment;
 import com.insframe.server.model.Attachment;
 import com.insframe.server.model.FileMetaData;
-import com.insframe.server.model.InspectionObject;
 import com.insframe.server.model.Task;
 import com.insframe.server.model.User;
 import com.insframe.server.security.CustomUserDetails;
@@ -40,6 +41,10 @@ public class AssignmentService {
 	InspectionObjectService inspectionObjectService;
 	@Autowired
 	UserService userService;
+	@Autowired
+	private MailService mailService;
+	@Autowired
+	private MessageSource messageSource;
 	
     public void addAttachmentToAssignment(String assignmentId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
@@ -316,11 +321,16 @@ public class AssignmentService {
 	}
 	
 	public Assignment createAssignment(Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
+		Assignment auxAssignment = null;
 		if(assignment.getId() == null) {
-			return save(assignment);
-		} else {
-			return updateAllAttributesById(assignment.getId(), assignment, false);
+			auxAssignment = save(assignment);
+			if(auxAssignment.getUser() != null){
+				User user = auxAssignment.getUser();
+				mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, LocaleContextHolder.getLocale()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{assignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
+			}
+			mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.new.assignment.created", null, LocaleContextHolder.getLocale()), messageSource.getMessage("email.message.new.assignment.created", null, LocaleContextHolder.getLocale()), assignment);
 		}
+		return auxAssignment;
 	}
 	
     public Assignment updateAllAttributesById(String id, Assignment updateAssignment, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
@@ -341,6 +351,11 @@ public class AssignmentService {
 	    		} else {
 	    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE, new String[]{updateAssignment.getAssignmentName()});
 	    		}
+	    		if(oldAssignment.getUser() != null && !oldAssignment.getUser().getUserName().equals(updateAssignment.getUser().getUserName())){
+	    			User user = oldAssignment.getUser();
+	    			mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, Locale.getDefault()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{oldAssignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
+	    		}
+	    		mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.assignment.modified", null, Locale.getDefault()), messageSource.getMessage("email.message.assignment.modified", null, Locale.getDefault()), oldAssignment);
 	    		return oldAssignment;
     		}
     		throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_FINISHED, new String[]{oldAssignment.getAssignmentName()});

@@ -68,11 +68,6 @@ public class AssignmentController {
 
 	@RequestMapping(method=RequestMethod.POST)
 	public Assignment createAssignment(@RequestBody Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
-//		if(assignment.getUser() != null){
-//			User user = assignment.getUser();
-//			mailService.sendEmail(user.getEmailAddress(), "You have a new assignment", "You have a new assignment");
-//		}
-//		mailService.sendEmailToAdmins("New assignment created", "The following assignment was created: "+assignment.getAssignmentName());
 		return assignmentService.createAssignment(assignment);
 	}
 	
@@ -87,11 +82,6 @@ public class AssignmentController {
 	public void updateAssignmentByID(@PathVariable("assignmentId") String assignmentId,
 									 @RequestBody Assignment assignment,
 									 @RequestParam(value = "overwrite", required = false) boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
-//		if(assignment.getUser() != null){
-//			User user = assignment.getUser();
-//			mailService.sendEmail(user.getEmailAddress(), "You have a new assignment", "The assignment '"+assignment.getAssignmentName()+"' was assigned to you.");
-//		}
-//		mailService.sendEmailToAdmins("An assignment was modified", "The following assignment was modified: "+assignment.getAssignmentName());
 		assignmentService.updateAllAttributesById(assignmentId, assignment, overwrite);
 	}
 	

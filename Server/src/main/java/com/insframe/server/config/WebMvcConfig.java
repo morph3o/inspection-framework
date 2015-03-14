@@ -30,7 +30,7 @@ import com.insframe.server.Application;
 @ComponentScan(basePackageClasses = Application.class, includeFilters = { @Filter(Controller.class),
 																		  @Filter(ControllerAdvice.class)}, useDefaultFilters = false)
 @EnableGlobalMethodSecurity(prePostEnabled=true)
-class WebMvcConfig extends WebMvcConfigurationSupport {
+public class WebMvcConfig extends WebMvcConfigurationSupport {
 	
     private static final String MESSAGE_SOURCE = "/WEB-INF/i18n/messages";
     private static final String VIEWS = "/WEB-INF/views/";
