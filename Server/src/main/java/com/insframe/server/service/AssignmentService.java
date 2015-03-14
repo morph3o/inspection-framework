@@ -294,7 +294,7 @@ public class AssignmentService {
 					task.setErrorDescription("");
 				}
 				if(task.getState() == null) {
-					task.setState(Task.STATE_OKAY);
+					task.setState(Task.STATE_INITIAL);
 				} else {
 					if(task.getState() < Task.STATE_INITIAL || task.getState() > Task.STATE_ERROR) {
 						throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(task.getState()), task.getTaskName()});
