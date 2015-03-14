@@ -30,6 +30,8 @@ public class UserService implements UserDetailsService{
 	private UserRepository userRepository;
 	@Autowired
 	private MongoOperations mongoOpts;
+	@Autowired
+	private MailService mailService;
 	
 	public User findById(String id) throws UserAccessException{
 		if(!userRepository.exists(id)) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, new String[]{id});
@@ -125,6 +127,10 @@ public class UserService implements UserDetailsService{
     	return updatedUser;
     }
     
+    public List<User> findByRole(String role){
+    	return userRepository.findByRole(role);
+    }
+    
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		User user = userRepository.findByUserName(username);
@@ -142,6 +148,12 @@ public class UserService implements UserDetailsService{
 			return ((CustomUserDetails) authentication.getPrincipal()).getUser();
 		}
 		return null;
+	}
+	
+	public void rememberPassword(String username) throws UserAccessException{
+		User u = userRepository.findByUserName(username);
+		if(u == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, new String[]{username});
+		mailService.sendEmailWithPassword(u);
 	}
 	
 }
