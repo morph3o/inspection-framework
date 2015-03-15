@@ -30,6 +30,7 @@ public class UserController {
 	private static final String MODIFY_USER = "/users/{userID}";
 	private static final String DELETE_USER_BY_USERID = "/users/{userID}";
 	private static final String DELETE_USER_BY_USERNAME = "/users/byusername/{username}";
+	private static final String REMEMBER_PASSWORD = "/users/rememberpass/{username}";
 	
 	@Autowired
 	private UserService userService;
@@ -95,6 +96,11 @@ public class UserController {
 			return ((CustomUserDetails) authentication.getPrincipal()).getUser();
 		}
 		return null;
+	}
+	
+	@RequestMapping( value=REMEMBER_PASSWORD, method = RequestMethod.GET )
+	public void rememberPassword(@PathVariable("username") String username) throws UserAccessException{
+		userService.rememberPassword(username);
 	}
 
 }

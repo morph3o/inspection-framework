@@ -15,4 +15,6 @@ public interface UserRepository extends MongoRepository<User, String>{
     
     public Long deleteUserByUserName(String username);
     public Long deleteUserById(String id);
+    
+    public List<User> findByRole(String role);
 }

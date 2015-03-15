@@ -50,6 +50,19 @@ public class Task {
 	public Integer getState() {
 		return state;
 	}
+	
+	public String getStateToString(){
+		switch(this.state){
+			case 0:
+				return "Initial";
+			case 1:
+				return "OK";
+			case 2:
+				return "Error";
+			default:
+				return null;
+		}
+	}
 
 	public void setState(Integer state) {
 		this.state = state;
