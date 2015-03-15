@@ -103,7 +103,7 @@ public class Attachment {
 		} else {
 			this.description = "";
 		}
-		if (serverContextPath != null && serverContextPath != "") {
+		if (serverContextPath != null && !serverContextPath.equals("")) {
 			this.url = protocol + "://" + hostName + ":" + port + "/"
 					+ serverContextPath + "/attachment/" + this.gridFsId;
 		} else {
