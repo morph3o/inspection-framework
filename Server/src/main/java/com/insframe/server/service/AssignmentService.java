@@ -59,7 +59,7 @@ public class AssignmentService {
     public void addAttachmentToTask(String assignmentId, String taskId, InputStream inputStream, String fileName, String contentType, FileMetaData metaData) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {   	
     	Assignment assignment = findById(assignmentId);
     	if(assignment.getIsTemplate() != true) {
-    		Task task = assignment.getTask(taskId);
+    		Task task = assignment.getTask(taskId, false);
 			if(task != null) {
 				task.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
 				save(assignment);
@@ -143,7 +143,7 @@ public class AssignmentService {
 	}
 	
 	public Task findTaskById(String assignmentId, String taskId, Boolean addAttachmentDetails) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
-		Task queriedTask = findById(assignmentId, addAttachmentDetails).getTask(taskId);
+		Task queriedTask = findById(assignmentId, addAttachmentDetails).getTask(taskId, true);
 		if(queriedTask != null) {
 			return queriedTask;
 		} else {
@@ -192,7 +192,7 @@ public class AssignmentService {
 	
 	public void deleteAttachment(String assignmentId, String taskId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
-		List<String> attachmentIds = assignment.getTask(taskId).listAttachmentIds();
+		List<String> attachmentIds = assignment.getTask(taskId, false).listAttachmentIds();
 		for (int i = 0; i < attachmentIds.size(); i++) {
 			String assignedAttachmentId = attachmentIds.get(i);
 			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
@@ -346,7 +346,11 @@ public class AssignmentService {
 	    		oldAssignment.setUser(updateAssignment.getUser());
 	    		oldAssignment.setTasks(updateAssignment.getTasks());
 	    		if(checkAssignmentVersion(oldAssignment, updateAssignment) || overwrite){
-	    			oldAssignment.setVersion(oldAssignment.getVersion()+1);
+	    			if(oldAssignment.getVersion() == null) {
+	    				oldAssignment.setVersion(1);
+	    			} else {
+	    				oldAssignment.setVersion(oldAssignment.getVersion()+1);
+	    			}
 	    			this.save(oldAssignment);
 	    		} else {
 	    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE, new String[]{updateAssignment.getAssignmentName()});
@@ -355,13 +359,22 @@ public class AssignmentService {
 	    			User user = oldAssignment.getUser();
 	    			mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, Locale.getDefault()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{oldAssignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
 	    		}
-	    		mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.assignment.modified", null, Locale.getDefault()), messageSource.getMessage("email.message.assignment.modified", null, Locale.getDefault()), oldAssignment);
+	    		if(oldAssignment.getIsTemplate() != true) {
+	    			mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.assignment.modified", null, Locale.getDefault()), messageSource.getMessage("email.message.assignment.modified", null, Locale.getDefault()), oldAssignment);
+	    		}
 	    		return oldAssignment;
     		}
     		throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_FINISHED, new String[]{oldAssignment.getAssignmentName()});
     	} else {
     		throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_TO_MODIFY_ASSIGNMENT, new String[]{updateAssignment.getAssignmentName()});
     	}
+    }
+    
+    public Task updateAssignmentTaskById(String assignmentId, String taskId, Task updateTask, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+    	Assignment updateAssignment = this.findById(assignmentId);
+    	updateAssignment.updateTask(taskId, updateTask);
+    	updateAssignment.setVersion(updateTask.getAssignmentVersion());
+    	return this.updateAllAttributesById(assignmentId, updateAssignment, overwrite).getTask(taskId, true);
     }
     
     private boolean checkValidAssignmentOwner(Assignment assignment){

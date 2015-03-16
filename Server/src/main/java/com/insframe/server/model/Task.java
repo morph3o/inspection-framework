@@ -3,6 +3,8 @@ package com.insframe.server.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 public class Task {
 	public static final Integer STATE_INITIAL = 0;
 	public static final Integer STATE_OKAY = 1;
@@ -12,6 +14,7 @@ public class Task {
 	private String taskName;
 	private String description;
 	private String errorDescription;
+	private Integer assignmentVersion;
 	private Integer state;
 	private List<Attachment> attachments;
 
@@ -51,6 +54,7 @@ public class Task {
 		return state;
 	}
 	
+	@JsonIgnore
 	public String getStateToString(){
 		switch(this.state){
 			case 0:
@@ -105,5 +109,13 @@ public class Task {
 
 	public void setErrorDescription(String errorDescription) {
 		this.errorDescription = errorDescription;
+	}
+
+	public Integer getAssignmentVersion() {
+		return assignmentVersion;
+	}
+
+	public void setAssignmentVersion(Integer assignmentVersion) {
+		this.assignmentVersion = assignmentVersion;
 	}
 }
