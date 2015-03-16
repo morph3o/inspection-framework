@@ -172,10 +172,13 @@ public class Assignment {
 		return tasks;
 	}
 
-	public Task getTask(String id) {
+	public Task getTask(String id, Boolean addAssignmentVersion) {
 		if(tasks != null) {
 			for (Task task : tasks) {
 				if (task.getId().equals(id)) {
+					if(addAssignmentVersion = true) {
+						task.setAssignmentVersion(this.version);
+					}
 					return task;
 				}
 			}
@@ -185,6 +188,14 @@ public class Assignment {
 
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
+	}
+	
+	public void updateTask(String taskId, Task task) {
+		Task updateTask = this.getTask(taskId, false);
+		updateTask.setDescription(task.getDescription());
+		updateTask.setErrorDescription(task.getErrorDescription());
+		updateTask.setState(task.getState());
+		updateTask.setTaskName(task.getTaskName());
 	}
 
 	public Date getStartDate() {

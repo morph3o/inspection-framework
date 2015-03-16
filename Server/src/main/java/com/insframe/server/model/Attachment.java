@@ -12,6 +12,8 @@ public class Attachment {
 
 	private String gridFsId;
 	@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
+	private String fileName;
+	@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 	private String url;
 	@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 	private String description;
@@ -81,9 +83,18 @@ public class Attachment {
 	public void setBytes(long bytes) {
 		this.bytes = bytes;
 	}
+	
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 
 	public void setAttachmentDetails(GridFSDBFile gridFsFileInformation,
 			String protocol, String hostName, String serverContextPath, int port) {
+		this.fileName = gridFsFileInformation.getFilename();
 		this.uploadDate = gridFsFileInformation.getUploadDate();
 		this.filetype = gridFsFileInformation.getContentType();
 		this.bytes = gridFsFileInformation.getLength();
@@ -92,11 +103,13 @@ public class Attachment {
 		} else {
 			this.description = "";
 		}
-		if (serverContextPath != null && serverContextPath != "") {
+		if (serverContextPath != null && !serverContextPath.equals("")) {
 			this.url = protocol + "://" + hostName + ":" + port + "/"
 					+ serverContextPath + "/attachment/" + this.gridFsId;
 		} else {
 			this.url = protocol + "://" + hostName + ":" + port + "/attachment/" + this.gridFsId;
 		}
 	}
+	
+
 }

@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,6 +26,7 @@ public class AttachmentController {
 	private GridFsService gridFsService;
 
 	@RequestMapping(value="/{imageId}", method=RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_INSPECTOR')")
 	public void getItemImage(@PathVariable("imageId") String imageId, HttpServletResponse response) throws IOException {
 	   GridFSDBFile gridFsImage = gridFsService.findById(imageId);
 	   response.setContentType(gridFsImage.getContentType());

@@ -85,6 +85,15 @@ public class AssignmentController {
 		assignmentService.updateAllAttributesById(assignmentId, assignment, overwrite);
 	}
 	
+	@RequestMapping(value="/{assignmentId}/task/{taskId}", method=RequestMethod.PUT)
+	@ResponseStatus(value=HttpStatus.NO_CONTENT)
+	public void updateTaskByID(@PathVariable("assignmentId") String assignmentId,
+								@PathVariable("taskId") String taskId,
+								@RequestBody Task task,
+								@RequestParam(value = "overwrite", required = false) boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+		assignmentService.updateAssignmentTaskById(assignmentId, taskId, task, overwrite);
+	}
+	
 	
 	@RequestMapping(value="/{assignmentId}/attachment", method=RequestMethod.POST)
 	public void addAttachmentToAssignment(@PathVariable("assignmentId") String assignmentId,
