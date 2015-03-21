@@ -2,7 +2,6 @@ package com.insframe.server.rest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 

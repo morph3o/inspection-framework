@@ -99,7 +99,7 @@ public class UserController {
 	}
 	
 	@RequestMapping( value=REMEMBER_PASSWORD, method = RequestMethod.GET )
-	public void rememberPassword(@PathVariable("username") String username) throws UserAccessException{
+	public void rememberPassword(@PathVariable("username") String username) throws UserAccessException {
 		userService.rememberPassword(username);
 	}
 

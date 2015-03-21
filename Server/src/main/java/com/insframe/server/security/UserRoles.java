@@ -2,6 +2,7 @@ package com.insframe.server.security;
 
 import org.springframework.security.core.GrantedAuthority;
 
+@SuppressWarnings("serial")
 public class UserRoles implements GrantedAuthority{
 	
 	String role = null;
