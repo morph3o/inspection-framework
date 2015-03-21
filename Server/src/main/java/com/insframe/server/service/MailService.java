@@ -1,10 +1,12 @@
 package com.insframe.server.service;
 
+import java.io.Console;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -31,11 +33,14 @@ public class MailService {
 		customMailMessage.setTo(to);
 		customMailMessage.setSubject(subject);
 		customMailMessage.setText(message);
-		
-		mailSender.send(customMailMessage);
+		try {
+			mailSender.send(customMailMessage);
+		} catch (MailSendException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	
-	public void sendEmail(String to, String subject, String message){
+	public void sendEmail(String to, String subject, String message) {
 		SimpleMailMessage customMailMessage = new SimpleMailMessage();
 		
 		customMailMessage.setFrom(SENDER_EMAIL);
@@ -43,7 +48,11 @@ public class MailService {
 		customMailMessage.setSubject(subject);
 		customMailMessage.setText(message);
 		
-		mailSender.send(customMailMessage);
+		try {
+			mailSender.send(customMailMessage);
+		} catch (MailSendException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	public void sendEmailToAdmins(String subject, String message){
@@ -65,11 +74,14 @@ public class MailService {
 			mailList[i] = auxMailMessage;
 			strBuffer = new StringBuffer();
 		}
-		
-		mailSender.send(mailList);
+		try {
+			mailSender.send(mailList);
+		} catch (MailSendException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	
-	public void sendEmailToAdminsWithAssignmentDetails(String subject, String message, Assignment assignment){
+	public void sendEmailToAdminsWithAssignmentDetails(String subject, String message, Assignment assignment) {
 		List<User> adminList = userService.findByRole("ROLE_ADMIN");
 		StringBuffer strBuffer = new StringBuffer();
 		SimpleMailMessage[] mailList = new SimpleMailMessage[adminList.size()];
@@ -90,8 +102,11 @@ public class MailService {
 			mailList[i] = auxMailMessage;
 			strBuffer = new StringBuffer();
 		}
-		
-		mailSender.send(mailList);
+		try {
+			mailSender.send(mailList);
+		} catch (MailSendException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 	
 	public void sendEmailWithPassword(User user){
@@ -106,7 +121,10 @@ public class MailService {
 		auxMailMessage.setTo(user.getEmailAddress());
 		auxMailMessage.setSubject(messageSource.getMessage("email.subject.password", null, LocaleContextHolder.getLocale()));
 		auxMailMessage.setText(strBuffer.toString());
-		
-		mailSender.send(auxMailMessage);
+		try {
+			mailSender.send(auxMailMessage);
+		} catch (MailSendException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }

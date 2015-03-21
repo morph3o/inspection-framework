@@ -1,10 +1,13 @@
 package com.insframe.server.rest;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -81,7 +84,7 @@ public class AssignmentController {
 	@ResponseStatus(value=HttpStatus.NO_CONTENT)
 	public void updateAssignmentByID(@PathVariable("assignmentId") String assignmentId,
 									 @RequestBody Assignment assignment,
-									 @RequestParam(value = "overwrite", required = false) boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+									 @RequestParam(value = "overwrite", required = false) boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException, InvocationTargetException, NoSuchMessageException {
 		assignmentService.updateAllAttributesById(assignmentId, assignment, overwrite);
 	}
 	
@@ -90,7 +93,7 @@ public class AssignmentController {
 	public void updateTaskByID(@PathVariable("assignmentId") String assignmentId,
 								@PathVariable("taskId") String taskId,
 								@RequestBody Task task,
-								@RequestParam(value = "overwrite", required = false) boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+								@RequestParam(value = "overwrite", required = false) boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException, InvocationTargetException, NoSuchMessageException {
 		assignmentService.updateAssignmentTaskById(assignmentId, taskId, task, overwrite);
 	}
 	
