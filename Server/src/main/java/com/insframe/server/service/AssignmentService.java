@@ -229,9 +229,12 @@ public class AssignmentService {
 	}
 	
 	public Assignment save(Assignment assignment) throws AssignmentStorageException, UserAccessException {
-		if(assignment.getAssignmentName() == null
-			|| assignment.getIsTemplate() == null) {
-			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"assignmentName and isTemplate"});
+		if(assignment.getAssignmentName() == null) {
+			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"assignmentName"});
+		}
+		
+		if(assignment.getIsTemplate() == null) {
+			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"isTemplate"});
 		}
 		
 		if(assignment.getIsTemplate() == false) {
@@ -260,8 +263,11 @@ public class AssignmentService {
 			if (assignment.getEndDate() != null) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"endDate"});
 			}
-			if (assignment.getAttachments() != null) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
+			if(assignment.getAttachments() == null) {
+				assignment.setAttachments(new ArrayList<Attachment>());
+			}
+			if(gridFsService.checkAttachmentsExist(assignment.listAttachmentIds()) == false) {
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
 			}
 		}
 		
@@ -291,6 +297,9 @@ public class AssignmentService {
 			assignment.setTasks(new ArrayList<Task>());
 		} else {
 			for (Task task : assignment.getTasks()) {
+				if(task.getTaskName() == null || task.getTaskName().equals("")) {
+					throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"task name"});
+				}
 				if(task.getId() == null) {
 					task.setId(ObjectId.get().toString());
 				}
