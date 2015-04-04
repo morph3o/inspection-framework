@@ -11,9 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "assignments")
 public class Assignment {
-	
+
 	public static final Integer STATE_INITIAL = 0;
-	public static final Integer STATE_IN_PROGRESS = 1; 
+	public static final Integer STATE_IN_PROGRESS = 1;
 	public static final Integer STATE_FINISHED = 2;
 
 	@Id
@@ -33,48 +33,78 @@ public class Assignment {
 	private User user;
 	@DBRef
 	private InspectionObject inspectionObject;
-	
+
 	private Integer version;
-	
-	public String toDescription(){
+
+	public String toDescription() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("ID: "+this.id+"\n");
-		sb.append("Name: "+this.assignmentName+"\n");
-		sb.append("Description: "+this.description+"\n");
-		sb.append("Start Date: "+this.startDate+"\n");
-		sb.append("End Date: "+this.endDate+"\n");
-		sb.append("Inspection Object: "+this.inspectionObject.getObjectName()+"\n");
-		sb.append("Person assigned: "+this.getUser().getFirstName()+" "+this.getUser().getLastName()+"\n");
-		sb.append("Tasks: \n");
-		int i = 1;
-		for(Task t : this.tasks){
-			sb.append("\t"+ i + "- " + t.getTaskName() + "\n");
-			sb.append("\t    State: "+ t.getStateToString()+"\n");
-			if(t.getState() == Task.STATE_ERROR){
-				sb.append("\t\tError Description: \n");
-				sb.append("\t\t"+t.getErrorDescription());
-			}
-			if(t.getAttachments().size() != 0){
-				sb.append("\t    Attachments:\n");
-				for(Attachment a : t.getAttachments()){
-					sb.append("\t\tDescription: "+a.getDescription()+"\n");
-					sb.append("\t\tFile type: "+a.getFiletype()+"\n");
-					sb.append("\t\tUpload date: "+a.getUploadDate()+"\n");
-				}
-			}else{
-				sb.append("\t    No attachments for this task.\n");
-			}
-			i++;
+		sb.append("ID: " + this.id + "\n");
+		sb.append("Name: " + this.assignmentName + "\n");
+		sb.append("Description: " + this.description + "\n");
+		if(this.startDate != null) {
+			sb.append("Start Date: " + this.startDate + "\n");
+		} else {
+			sb.append("Start Date: No start date defined. \n");
 		}
-		if(this.getAttachments().size() != 0){
-			sb.append("Attachments: \n");
-			i = 1;
-			for(Attachment a : this.getAttachments()){
-				sb.append("\tDescription: "+a.getDescription()+"\n");
-				sb.append("\tFile type: "+a.getFiletype()+"\n");
-				sb.append("\tUpload date: "+a.getUploadDate()+"\n");
+		
+		if(this.endDate != null) {
+			sb.append("End Date: " + this.endDate + "\n");
+		} else {
+			sb.append("End Date: No end date defined. \n");
+		}
+		
+		if (this.inspectionObject != null) {
+			sb.append("Inspection Object: "
+					+ this.inspectionObject.getObjectName() + "\n");
+		} else {
+			sb.append("Inspection Object: No inspection object assigned. \n");
+		}
+		
+		if (this.user != null) {
+			sb.append("Person assigned: " + this.getUser().getFirstName() + " "
+					+ this.getUser().getLastName() + "\n");
+		} else {
+			sb.append("Person assigned: No person assigned. \n");
+		}
+		
+		if(this.tasks.size() != 0) {
+			sb.append("Tasks: \n");
+			int i = 1;
+			for (Task t : this.tasks) {
+				sb.append("\t" + i + "- " + t.getTaskName() + "\n");
+				sb.append("\t    State: " + t.getStateToString() + "\n");
+				if (t.getState() == Task.STATE_ERROR) {
+					sb.append("\t\tError Description: \n");
+					sb.append("\t\t" + t.getErrorDescription());
+				}
+				if (t.getAttachments().size() != 0) {
+					sb.append("\t    Attachments:\n");
+					for (Attachment a : t.getAttachments()) {
+						sb.append("\t\tDescription: " + a.getDescription() + "\n");
+						sb.append("\t\tFile type: " + a.getFiletype() + "\n");
+						sb.append("\t\tUpload date: " + a.getUploadDate() + "\n");
+					}
+				} else {
+					sb.append("\t    No attachments for this task.\n");
+				}
+				i++;
 			}
-		}else{
+		} else {
+			sb.append("Tasks: No tasks. \n");
+		}
+		
+		if (this.getAttachments() != null) {
+			if(this.getAttachments().size() != 0) {
+				sb.append("Attachments: \n");
+				for (Attachment a : this.getAttachments()) {
+					sb.append("\tDescription: " + a.getDescription() + "\n");
+					sb.append("\tFile type: " + a.getFiletype() + "\n");
+					sb.append("\tUpload date: " + a.getUploadDate() + "\n");
+				}
+			} else {
+				sb.append("No attachments for this assignment.");
+			}
+		} else {
 			sb.append("No attachments for this assignment.");
 		}
 		return sb.toString();
@@ -83,7 +113,7 @@ public class Assignment {
 	public Assignment() {
 		super();
 	}
-	
+
 	public Assignment(String assignmentName, String description,
 			Boolean isTemplate) {
 		super();
@@ -173,10 +203,10 @@ public class Assignment {
 	}
 
 	public Task getTask(String id, Boolean addAssignmentVersion) {
-		if(tasks != null) {
+		if (tasks != null) {
 			for (Task task : tasks) {
 				if (task.getId().equals(id)) {
-					if(addAssignmentVersion = true) {
+					if (addAssignmentVersion = true) {
 						task.setAssignmentVersion(this.version);
 					}
 					return task;
@@ -189,7 +219,7 @@ public class Assignment {
 	public void setTasks(List<Task> tasks) {
 		this.tasks = tasks;
 	}
-	
+
 	public void updateTask(String taskId, Task task) {
 		Task updateTask = this.getTask(taskId, false);
 		updateTask.setDescription(task.getDescription());
@@ -237,7 +267,7 @@ public class Assignment {
 		}
 		return attachmentIds;
 	}
-	
+
 	public List<Attachment> getAttachments() {
 		return attachments;
 	}
@@ -245,14 +275,14 @@ public class Assignment {
 	public void setAttachments(List<Attachment> attachments) {
 		this.attachments = attachments;
 	}
-	
+
 	public void addAttachment(String gridFsId) {
-		if(attachments == null){
+		if (attachments == null) {
 			attachments = new ArrayList<Attachment>();
 		}
 		attachments.add(new Attachment(gridFsId));
 	}
-	
+
 	public Integer getState() {
 		return state;
 	}

@@ -1,6 +1,7 @@
 package com.insframe.server.service;
 
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -8,6 +9,7 @@ import java.util.Locale;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -192,12 +194,12 @@ public class AssignmentService {
 	
 	public void deleteAttachment(String assignmentId, String taskId, String attachmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Assignment assignment = findById(assignmentId);
-		List<String> attachmentIds = assignment.getTask(taskId, false).listAttachmentIds();
-		for (int i = 0; i < attachmentIds.size(); i++) {
-			String assignedAttachmentId = attachmentIds.get(i);
-			if(assignedAttachmentId.equalsIgnoreCase(attachmentId)){
-				gridFsService.deleteById(assignedAttachmentId);
-				attachmentIds.remove(assignedAttachmentId);
+		List<Attachment> attachments = assignment.getTask(taskId, false).getAttachments();
+		for (int i = 0; i < attachments.size(); i++) {
+			Attachment assignedAttachment = attachments.get(i);
+			if(assignedAttachment.getGridFsId().equalsIgnoreCase(attachmentId)){
+				gridFsService.deleteById(attachmentId);
+				attachments.remove(assignedAttachment);
 			}
 		}
 		save(assignment);
@@ -227,9 +229,12 @@ public class AssignmentService {
 	}
 	
 	public Assignment save(Assignment assignment) throws AssignmentStorageException, UserAccessException {
-		if(assignment.getAssignmentName() == null
-			|| assignment.getIsTemplate() == null) {
-			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"assignmentName and isTemplate"});
+		if(assignment.getAssignmentName() == null) {
+			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"assignmentName"});
+		}
+		
+		if(assignment.getIsTemplate() == null) {
+			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"isTemplate"});
 		}
 		
 		if(assignment.getIsTemplate() == false) {
@@ -258,8 +263,11 @@ public class AssignmentService {
 			if (assignment.getEndDate() != null) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"endDate"});
 			}
-			if (assignment.getAttachments() != null) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
+			if(assignment.getAttachments() == null) {
+				assignment.setAttachments(new ArrayList<Attachment>());
+			}
+			if(gridFsService.checkAttachmentsExist(assignment.listAttachmentIds()) == false) {
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
 			}
 		}
 		
@@ -289,6 +297,9 @@ public class AssignmentService {
 			assignment.setTasks(new ArrayList<Task>());
 		} else {
 			for (Task task : assignment.getTasks()) {
+				if(task.getTaskName() == null || task.getTaskName().equals("")) {
+					throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"task name"});
+				}
 				if(task.getId() == null) {
 					task.setId(ObjectId.get().toString());
 				}
@@ -325,7 +336,7 @@ public class AssignmentService {
 		if(assignment.getId() == null) {
 			auxAssignment = save(assignment);
 			if(auxAssignment.getUser() != null){
-				User user = auxAssignment.getUser();
+				User user = userService.findById(auxAssignment.getUser().getId());
 				mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, LocaleContextHolder.getLocale()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{assignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
 			}
 			mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.new.assignment.created", null, LocaleContextHolder.getLocale()), messageSource.getMessage("email.message.new.assignment.created", null, LocaleContextHolder.getLocale()), assignment);
@@ -333,7 +344,7 @@ public class AssignmentService {
 		return auxAssignment;
 	}
 	
-    public Assignment updateAllAttributesById(String id, Assignment updateAssignment, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+    public Assignment updateAllAttributesById(String id, Assignment updateAssignment, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException, NoSuchMessageException {
     	if(checkValidAssignmentOwner(updateAssignment)){
     		Assignment oldAssignment = findById(id);
     		if(oldAssignment.getState() != Assignment.STATE_FINISHED || SecurityTools.currentUserHasAuthority("ROLE_ADMIN")){
@@ -370,7 +381,7 @@ public class AssignmentService {
     	}
     }
     
-    public Task updateAssignmentTaskById(String assignmentId, String taskId, Task updateTask, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
+    public Task updateAssignmentTaskById(String assignmentId, String taskId, Task updateTask, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException, InvocationTargetException, NoSuchMessageException {
     	Assignment updateAssignment = this.findById(assignmentId);
     	updateAssignment.updateTask(taskId, updateTask);
     	updateAssignment.setVersion(updateTask.getAssignmentVersion());

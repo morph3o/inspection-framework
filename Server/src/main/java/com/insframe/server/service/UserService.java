@@ -3,7 +3,6 @@ package com.insframe.server.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.UserRepository;
-import com.insframe.server.error.InspectionObjectStorageException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.User;
