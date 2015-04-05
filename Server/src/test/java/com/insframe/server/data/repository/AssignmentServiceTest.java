@@ -3,7 +3,10 @@ package com.insframe.server.data.repository;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -12,6 +15,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 
 import com.insframe.server.config.WebAppConfigurationAware;
 import com.insframe.server.error.AssignmentAccessException;
@@ -40,10 +47,14 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 	private InspectionObjectService inspectionObjectService;
 	@Autowired
 	private GridFsService gridFsService;
+	@Autowired
+	private AssignmentRepository assignmentRepository;
 	
 	@Before
 	public void init() throws FileNotFoundException, AssignmentStorageException, InspectionObjectAccessException, UserAccessException, UserStorageException, InspectionObjectStorageException, AssignmentAccessException{
-		assignmentService.deleteAll();
+		assignmentRepository.deleteAll();
+		userService.deleteAll();
+		inspectionObjectService.deleteAll();
 		assignmentService.save(new Assignment("Check University of Mannheim", "Go to the university of Mannheim and perform the needed checks.", true));
 		
 		userService.save(new User("assignmentTest", "assignmentTest@gmail.com", "assignmentTest", "ROLE_ADMIN", "assignmentTest", "assignmentTest", "+49162123456", "+49162123456"));
@@ -56,7 +67,7 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 		tasks.add(new Task("Check north pillar", "Check north pillar", Task.STATE_OKAY));
 		tasks.add(new Task("Check south pillar", "Check south pillar", Task.STATE_OKAY));
 		Assignment bridgeAssignment = new Assignment("Check Ernst-Walz", "Go to the Ernst-Walz bridge in Heidelberg and perform the needed checks.", false, 0, 
-				tasks, new Date(), new Date(), userService.findByUserName("ppilgrim"), inspectionObjectService.findByObjectName("Ernst-Walz bridge", false));
+				tasks, new Date(), new Date(), userService.findByUserName("assignmentTest"), inspectionObjectService.findByObjectName("Ernst-Walz bridge", false));
 		
 		InputStream is = new FileInputStream("bridge.jpg");
 		
@@ -68,7 +79,7 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 	public void executePrintAllAssignments() throws AssignmentAccessException{
 		System.out.println("****** Should Show all the Assignments in the database ******");
 		System.out.println("Show the 2 Assignments and their data");
-		List<Assignment> AssignmentList = assignmentService.findAll();
+		List<Assignment> AssignmentList = assignmentRepository.findAll();
 		for(Assignment Assignment : AssignmentList){
 			System.out.println(Assignment);
 		}
@@ -76,6 +87,54 @@ public class AssignmentServiceTest extends WebAppConfigurationAware {
 		System.out.println("****** End of Should Show All the Assignments in the database ******");
 	}
 	
+	@Test(expected=AssignmentStorageException.class)
+	public void shouldThrowExceptionDueToInvalidDates() throws AssignmentAccessException, ParseException, AssignmentStorageException, UserAccessException{
+		System.out.println("****** Should throw an Exception because the dates are invalid (end date is older than start date) ******");
+		List<Assignment> assignmentList = assignmentRepository.findAll();
+		Assignment auxAs = new Assignment();
+		for(Assignment a : assignmentList){
+			if(!a.getIsTemplate()) auxAs = a;
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		auxAs.setStartDate(sdf.parse("10/03/2015"));
+		auxAs.setEndDate(sdf.parse("09/03/2015"));
+		assignmentService.save(auxAs);
+		System.out.println("****** End of Should throw an Exception because the dates are invalid (end date is older than start date) ******");
+	}
+	
+	@Test
+	public void shouldValidEqualDates() throws AssignmentAccessException, ParseException, AssignmentStorageException, UserAccessException{
+		System.out.println("****** Should Valid two equal dates, start date is equal than end date ******");
+		List<Assignment> assignmentList = assignmentRepository.findAll();
+		Assignment auxAs = new Assignment();
+		for(Assignment a : assignmentList){
+			if(!a.getIsTemplate()) auxAs = a;
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		auxAs.setStartDate(sdf.parse("10/03/2015"));
+		auxAs.setEndDate(sdf.parse("10/03/2015"));
+		Assignment a2 = assignmentService.save(auxAs);
+		System.out.println("Start date: "+sdf.format(a2.getStartDate()));
+		System.out.println("End date: "+sdf.format(a2.getEndDate()));
+		System.out.println("****** End of Should Should Valid two equal dates, start date is equal than end date ******");
+	}
+	
+	@Test
+	public void shouldValidDifferentButValidDates() throws AssignmentAccessException, ParseException, AssignmentStorageException, UserAccessException{
+		System.out.println("****** Should Valid Two Different but valid dates, Start date is older than End date ******");
+		List<Assignment> assignmentList = assignmentRepository.findAll();
+		Assignment auxAs = new Assignment();
+		for(Assignment a : assignmentList){
+			if(!a.getIsTemplate()) auxAs = a;
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		auxAs.setStartDate(sdf.parse("10/03/2015"));
+		auxAs.setEndDate(sdf.parse("15/03/2015"));
+		Assignment a2 = assignmentService.save(auxAs);
+		System.out.println("Start date: "+sdf.format(a2.getStartDate()));
+		System.out.println("End date: "+sdf.format(a2.getEndDate()));
+		System.out.println("****** End of Should Valid Two Different but valid dates, Start date is older than End date ******");
+	}
 //	@Test
 //	public void executeAssignmentByIdDeletion() {
 //		System.out.println("****** Should Delete Assignment by ID ******");

@@ -247,6 +247,9 @@ public class AssignmentService {
 			if(assignment.getAttachments() == null) {
 				assignment.setAttachments(new ArrayList<Attachment>());
 			}
+			if(checkValidStartAndEndDate(assignment) == false){
+				throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID, new String[]{});
+			}
 			if(gridFsService.checkAttachmentsExist(assignment.listAttachmentIds()) == false) {
 				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
 			}
@@ -351,8 +354,12 @@ public class AssignmentService {
 	    		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
 	    		oldAssignment.setDescription(updateAssignment.getDescription());
 	    		oldAssignment.setState(updateAssignment.getState());
-	    		oldAssignment.setStartDate(updateAssignment.getStartDate());
-	    		oldAssignment.setEndDate(updateAssignment.getEndDate());
+	    		if(updateAssignment.getStartDate().compareTo(updateAssignment.getEndDate()) <= 0){
+	    			oldAssignment.setStartDate(updateAssignment.getStartDate());
+		    		oldAssignment.setEndDate(updateAssignment.getEndDate());
+	    		} else {
+	    			throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID, new String[]{});
+	    		}
 	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
 	    		oldAssignment.setUser(updateAssignment.getUser());
 	    		oldAssignment.setTasks(updateAssignment.getTasks());
@@ -444,6 +451,13 @@ public class AssignmentService {
     	} else {
     		return false;
     	}
+    }
+    
+    private boolean checkValidStartAndEndDate(Assignment assignment){
+    	if(assignment.getStartDate().compareTo(assignment.getEndDate()) > 0){
+    		return false;
+		}
+    	return true;
     }
         
     private List<Assignment> filterByLoginUser(List<Assignment> assignments) {

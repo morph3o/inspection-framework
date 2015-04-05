@@ -120,6 +120,7 @@ public class Assignment {
 		this.assignmentName = assignmentName;
 		this.description = description;
 		this.isTemplate = isTemplate;
+		this.tasks = new ArrayList<Task>();
 	}
 
 	public Assignment(String assignmentName, String description,
