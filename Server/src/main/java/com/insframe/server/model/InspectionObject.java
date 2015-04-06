@@ -88,8 +88,10 @@ public class InspectionObject {
 	
 	public List<String> listAttachmentIds() {
 		List<String> attachmentIds = new ArrayList<String>();
-		for (Attachment attachment : attachments) {
-			attachmentIds.add(attachment.getGridFsId());
+		if(attachments != null) {
+			for (Attachment attachment : attachments) {
+				attachmentIds.add(attachment.getGridFsId());
+			}
 		}
 		return attachmentIds;
 	}
