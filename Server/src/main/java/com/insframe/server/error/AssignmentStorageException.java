@@ -17,6 +17,7 @@ public class AssignmentStorageException extends
 	public static final String INVALID_USER_TO_MODIFY_ASSIGNMENT = "error.assignment.invalid.user.to.modify";
 	public static final String ASSIGNMENT_FINISHED = "error.assignment.finished";
 	public static final String ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID = "error.assignment.startdate.enddate.invalid";
+	public static final String UNEXPECTED_ERROR_HAPPENED = "error.assignment.unexpected";
 
 	public AssignmentStorageException(String textId, String[] args) {
 		super(textId, args);
