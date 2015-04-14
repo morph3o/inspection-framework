@@ -405,7 +405,6 @@ public class AssignmentService {
     	//TODO: Remove that check for the current User later once security is enabled for assignment service.
     	// 		A user should always be logged in!
     	User currentUser = userService.getCurrentUser();
-    	User assignmentUser = userService.findById(assignment.getUser().getId());
     	if(currentUser != null) {
 	    	final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 	    	if (authentication.getPrincipal() instanceof CustomUserDetails) {
@@ -415,6 +414,7 @@ public class AssignmentService {
 						return true;
 					}
 				} else {
+					User assignmentUser = userService.findById(assignment.getUser().getId());
 					if(assignmentUser.getUserName().equals(authenticatedUser.getUserName()) || SecurityTools.hasAuthority((CustomUserDetails) authentication.getPrincipal(), "ROLE_ADMIN")){
 						return true;
 					}
