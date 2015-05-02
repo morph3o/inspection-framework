@@ -12,6 +12,8 @@ public class InspectionObjectAccessException extends
 	public static final int NO_OBJECTS_FOUND_BY_CUSTOMERNAME_ERRORCODE = 6003;
 	public static final String NO_OBJECTS_FOUND_BY_OBJECTNAME_TEXT_ID = "error.no.inspectionobject.with.objectname";
 	public static final int NO_OBJECTS_FOUND_BY_OBJECTNAME_ERRORCODE = 6004;
+	public static final String INSPOBJ_ASSIGNED_IN_ASSIGNMENTS_TEXT_ID = "error.inspobject.assigned.in.assignments";
+	public static final int INSPOBJ_ASSIGNED_IN_ASSIGNMENTS_ERRORCODE = 6005;
 	
 
 	public InspectionObjectAccessException(String textId, int errorCode, String[] args) {

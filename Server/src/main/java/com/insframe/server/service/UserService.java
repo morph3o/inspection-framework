@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.UserRepository;
+import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.error.UserStorageException;
 import com.insframe.server.model.User;
@@ -30,6 +31,8 @@ public class UserService implements UserDetailsService{
 	private MongoOperations mongoOpts;
 	@Autowired
 	private MailService mailService;
+	@Autowired
+	private AssignmentService assignmentService;
 	
 	public User findById(String id) throws UserAccessException{
 		if(!userRepository.exists(id)) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND,UserAccessException.USERID_NOT_FOUND_ERRORCODE, new String[]{id});
@@ -48,14 +51,24 @@ public class UserService implements UserDetailsService{
     	return userRepository.findByUserName(username);
     }
     
-    public Long deleteUserByUserName(String username) throws UserAccessException{
-    	if(userRepository.findByUserName(username) == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, UserAccessException.USERNAME_NOT_FOUND_ERRORCODE, new String[]{username});
-    	return userRepository.deleteUserByUserName(username);
+    public void deleteUserByUserName(String username) throws UserAccessException{
+    	User user = userRepository.findByUserName(username);
+    	if(user == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, UserAccessException.USERNAME_NOT_FOUND_ERRORCODE, new String[]{username});
+    	deleteUserById(user.getId());
     }
     
-    public Long deleteUserById(String id) throws UserAccessException{
-    	if(userRepository.findById(id) == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, UserAccessException.USERID_NOT_FOUND_ERRORCODE, new String[]{id}); 
-    	return userRepository.deleteUserById(id);
+    public void deleteUserById(String id) throws UserAccessException {
+    	@SuppressWarnings("unused")
+		boolean noReferenceFound;
+    	if(userRepository.findById(id) == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, UserAccessException.USERID_NOT_FOUND_ERRORCODE, new String[]{id});
+    	try {
+			assignmentService.findByUserId(id);
+			noReferenceFound = false;
+		} catch (AssignmentAccessException e) {
+			noReferenceFound = true;
+		}
+    	if(noReferenceFound == false) throw new UserAccessException(UserAccessException.USER_ASSIGNED_IN_ASSIGNMENTS, UserAccessException.USER_ASSIGNED_IN_ASSIGNMENTS_ERRORCODE, new String[]{id});
+    	userRepository.deleteUserById(id);
     }
     
     public void save(User user) throws UserStorageException{

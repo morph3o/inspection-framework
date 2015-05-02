@@ -10,8 +10,10 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Repository;
 
 import com.insframe.server.data.repository.InspectionObjectRepository;
+import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.InspectionObjectAccessException;
 import com.insframe.server.error.InspectionObjectStorageException;
+import com.insframe.server.error.UserAccessException;
 import com.insframe.server.model.Attachment;
 import com.insframe.server.model.FileMetaData;
 import com.insframe.server.model.InspectionObject;
@@ -25,6 +27,8 @@ public class InspectionObjectService {
 	GridFsService gridFsService;
 	@Autowired	
 	private MongoOperations mongoOpts;
+	@Autowired
+	AssignmentService assignmentService;
 	
 	@SuppressWarnings("null")
 	public List<InspectionObject> findAll(Boolean addAttachmentDetails) throws InspectionObjectAccessException {
@@ -111,7 +115,18 @@ public class InspectionObjectService {
     }
     
     public void deleteInspectionObjectByID(String id) throws InspectionObjectAccessException{
+    	@SuppressWarnings("unused")
+		boolean noReferenceFound;
+    	
     	InspectionObject inspectionObject = this.findById(id, false);
+    	try {
+    		assignmentService.findByInspectionObjectId(id);
+			noReferenceFound = false;
+		} catch (AssignmentAccessException | UserAccessException e) {
+			noReferenceFound = true;
+		}
+    	if(noReferenceFound == false) throw new InspectionObjectAccessException(InspectionObjectAccessException.INSPOBJ_ASSIGNED_IN_ASSIGNMENTS_TEXT_ID, InspectionObjectAccessException.INSPOBJ_ASSIGNED_IN_ASSIGNMENTS_ERRORCODE, new String[]{id});
+    	
     	gridFsService.deleteFileList(inspectionObject.listAttachmentIds());
     	inspectionObjectRepository.delete(id);
     }

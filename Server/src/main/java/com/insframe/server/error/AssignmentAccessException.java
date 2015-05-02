@@ -14,7 +14,9 @@ public class AssignmentAccessException extends
 	public static final int TASK_ID_NOT_FOUND_ERRORCODE = 7004;
 	public static final String NO_OBJECTS_BY_USER_ID_FOUND_TEXT_ID = "error.no.assignment.with.user_id";
 	public static final int NO_OBJECTS_BY_USER_ID_FOUND_ERRORCODE = 7005;
-
+	public static final String NO_OBJECTS_BY_INSPOBJ_ID_FOUND_TEXT_ID = "error.no.assignment.with.inspobj_id";
+	public static final int NO_OBJECTS_BY_INSPOBJ_ID_FOUND_ERRORCODE = 7006;
+	
 	public AssignmentAccessException(String textId, int errorCode, String[] args) {
 		super(textId, errorCode, args);
 	}
