@@ -151,7 +151,7 @@ public class UserService implements UserDetailsService{
 	public void rememberPassword(String username, String email) throws UserAccessException{
 		User u = userRepository.findByUserName(username);
 		if(u == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, UserAccessException.USERNAME_NOT_FOUND_ERRORCODE, new String[]{username});
-		if(!u.getEmailAddress().equals(email)) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, UserAccessException.USERNAME_NOT_FOUND_ERRORCODE, new String[]{username});
+		if(!u.getEmailAddress().equals(email)) throw new UserAccessException(UserAccessException.MAIL_OR_USERNAME_NOT_VALID, UserAccessException.MAIL_OR_USERNAME_NOT_VALID_ERRORCODE, new String[]{username, email});
 		mailService.sendEmailWithPassword(u);
 		
 	}

@@ -42,11 +42,11 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public TokenBasedRememberMeServices rememberMeServices() {
-    	TokenBasedRememberMeServices tokenServices;
+//    	TokenBasedRememberMeServices tokenServices;
     	
-        tokenServices = new TokenBasedRememberMeServices("remember-me-key", userService);
-        tokenServices.setTokenValiditySeconds(1209600);
-        return tokenServices;
+//        tokenServices = new TokenBasedRememberMeServices("remember-me-key", userService);
+//        tokenServices.setTokenValiditySeconds(1209600);
+        return new TokenBasedRememberMeServices("remember-me-key", userService);
     }
 
     @Bean

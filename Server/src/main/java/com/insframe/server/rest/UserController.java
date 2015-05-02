@@ -31,7 +31,7 @@ public class UserController {
 	private static final String MODIFY_USER = "/users/{userID}";
 	private static final String DELETE_USER_BY_USERID = "/users/{userID}";
 	private static final String DELETE_USER_BY_USERNAME = "/users/byusername/{username}";
-	private static final String REMEMBER_PASSWORD = "/users/rememberpass/{username}";
+	private static final String REMEMBER_PASSWORD = "/users/rememberpass";
 	
 	@Autowired
 	private UserService userService;
