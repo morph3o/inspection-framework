@@ -144,6 +144,22 @@ public class AssignmentService {
 		}
 	}
 	
+	public List<Assignment> findByInspectionObjectId(String inspectionObjectId) throws AssignmentAccessException, UserAccessException {
+		List<Assignment> assignments =  assignmentRepository.findByInspectionObjectId(new ObjectId(inspectionObjectId));
+		if(assignments == null) {
+			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_BY_INSPOBJ_ID_FOUND_TEXT_ID, AssignmentAccessException.NO_OBJECTS_BY_INSPOBJ_ID_FOUND_ERRORCODE, new String[]{inspectionObjectId});
+		}
+		return filterByLoginUser(assignments);
+	}
+	
+	public List<Assignment> findByInspectionObjectId(String inspectionObjectId, Boolean addAttachmentDetails) throws AssignmentAccessException, UserAccessException {
+		if (addAttachmentDetails) {
+			return addAttachmentDetails(findByInspectionObjectId(inspectionObjectId));
+		} else {
+			return findByInspectionObjectId(inspectionObjectId);
+		}
+	}
+	
 	public Task findTaskById(String assignmentId, String taskId, Boolean addAttachmentDetails) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		Task queriedTask = findById(assignmentId, addAttachmentDetails).getTask(taskId, true);
 		if(queriedTask != null) {
@@ -270,7 +286,9 @@ public class AssignmentService {
 	    			throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_TEXT_ID, AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_ERRORCODE, new String[]{});
 	    		}
 	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
-	    		oldAssignment.setUser(userService.findById(updateAssignment.getUser().getId()));
+	    		if(updateAssignment.getUser() != null) {
+	    			oldAssignment.setUser(userService.findById(updateAssignment.getUser().getId()));
+	    		}
 	    		oldAssignment.setTasks(updateAssignment.getTasks());
 	    		if(checkAssignmentVersion(oldAssignment, updateAssignment) || overwrite){
 	    			if(oldAssignment.getVersion() == null) {
@@ -487,6 +505,9 @@ public class AssignmentService {
 			for (Task task : assignment.getTasks()) {
 				gridFsService.addAttachmentDetails(task.getAttachments());
 			}
+			if(assignment.getInspectionObject() != null) {
+				gridFsService.addAttachmentDetails(assignment.getInspectionObject().getAttachments());;
+			}
 		}
 		return assignments;
     }
@@ -495,6 +516,9 @@ public class AssignmentService {
 		gridFsService.addAttachmentDetails(assignment.getAttachments());
 		for (Task task : assignment.getTasks()) {
 			gridFsService.addAttachmentDetails(task.getAttachments());
+		}
+		if(assignment.getInspectionObject() != null) {
+			gridFsService.addAttachmentDetails(assignment.getInspectionObject().getAttachments());;
 		}
 		return assignment;
     }

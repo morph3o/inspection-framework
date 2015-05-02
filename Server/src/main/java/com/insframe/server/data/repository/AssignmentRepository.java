@@ -16,4 +16,6 @@ public interface AssignmentRepository extends MongoRepository<Assignment, String
 	// access to multiple objects
 	@Query(value = "{ 'user.$id' : ?0 }")
 	public List<Assignment> findByUserId(ObjectId userId);
+	@Query(value = "{ 'inspectionObject.$id' : ?0 }")
+	public List<Assignment> findByInspectionObjectId(ObjectId inspectionObjectId);
 }

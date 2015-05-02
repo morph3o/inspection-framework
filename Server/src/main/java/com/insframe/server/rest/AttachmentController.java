@@ -1,11 +1,14 @@
 package com.insframe.server.rest;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,14 +27,24 @@ public class AttachmentController {
 	
 	@Autowired
 	private GridFsService gridFsService;
-
+	
 	@RequestMapping(value="/{imageId}", method=RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_INSPECTOR')")
-	public void getItemImage(@PathVariable("imageId") String imageId, HttpServletResponse response) throws IOException {
+	public HttpEntity<byte[]> getItemImage(@PathVariable("imageId") String imageId, HttpServletResponse response) throws IOException {
+		byte[] documentBody = null;
+		ByteArrayOutputStream out = null;
+		
 	   GridFSDBFile gridFsImage = gridFsService.findById(imageId);
-	   response.setContentType(gridFsImage.getContentType());
-	   IOUtils.copy(gridFsImage.getInputStream(), response.getOutputStream());
-	   response.getOutputStream().flush();
+   
+	   out = new ByteArrayOutputStream();
+	   IOUtils.copy(gridFsImage.getInputStream(), out);
+	   HttpHeaders responseHeaders = new HttpHeaders();
+	   responseHeaders.set("Content-Disposition", "attachment;filename=" + gridFsImage.getFilename());
+	   responseHeaders.set("Content-Type", gridFsImage.getContentType());
+	   responseHeaders.set("Content-Length", Long.toString(gridFsImage.getLength()));
+	   
+	   documentBody = out.toByteArray();
+	   return new HttpEntity<byte[]>(documentBody, responseHeaders);
 	} 
 	/*
 	 method only used for development purposes
