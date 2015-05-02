@@ -118,7 +118,7 @@ public class AssignmentController {
 					assignmentService.addAttachmentToAssignment(assignmentId, multipartFile.getInputStream(), multipartFile.getOriginalFilename(), multipartFile.getContentType(), new FileMetaData(""));
 				}
 	        } else {
-	        	throw new FileUploadException(FileUploadException.EMPTY_FILE_UPLOAD_TEXT_ID,new String[]{});
+	        	throw new FileUploadException(FileUploadException.EMPTY_FILE_UPLOAD_TEXT_ID, FileUploadException.EMPTY_FILE_UPLOAD_ERRORCODE, new String[]{});
 	        }
 		}
 	}
@@ -145,7 +145,7 @@ public class AssignmentController {
 					assignmentService.addAttachmentToTask(assignmentId, taskId, multipartFile.getInputStream(), multipartFile.getOriginalFilename(), multipartFile.getContentType(), new FileMetaData(""));
 				}
 	        } else {
-	        	throw new FileUploadException(FileUploadException.EMPTY_FILE_UPLOAD_TEXT_ID,new String[]{});
+	        	throw new FileUploadException(FileUploadException.EMPTY_FILE_UPLOAD_TEXT_ID, FileUploadException.EMPTY_FILE_UPLOAD_ERRORCODE, new String[]{});
 	        }
 		}
 	}

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.insframe.server.error.UserAccessException;
@@ -99,8 +100,8 @@ public class UserController {
 	}
 	
 	@RequestMapping( value=REMEMBER_PASSWORD, method = RequestMethod.GET )
-	public void rememberPassword(@PathVariable("username") String username) throws UserAccessException {
-		userService.rememberPassword(username);
+	public void rememberPassword(@RequestParam("username") String username, @RequestParam("email") String email) throws UserAccessException {
+		userService.rememberPassword(username, email);
 	}
 
 }

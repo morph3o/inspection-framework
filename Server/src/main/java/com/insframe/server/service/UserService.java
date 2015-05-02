@@ -32,51 +32,51 @@ public class UserService implements UserDetailsService{
 	private MailService mailService;
 	
 	public User findById(String id) throws UserAccessException{
-		if(!userRepository.exists(id)) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, new String[]{id});
+		if(!userRepository.exists(id)) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND,UserAccessException.USERID_NOT_FOUND_ERRORCODE, new String[]{id});
 		return userRepository.findById(id);
 	}
 	public User findByFirstName(String firstName){
 		return userRepository.findByFirstName(firstName);
 	}
     public List<User> findByLastName(String lastName) throws UserAccessException{
-    	if(userRepository.findByUserName(lastName) == null) throw new UserAccessException(UserAccessException.LASTNAME_NOT_FOUND, new String[]{lastName});
+    	if(userRepository.findByUserName(lastName) == null) throw new UserAccessException(UserAccessException.LASTNAME_NOT_FOUND, UserAccessException.LASTNAME_NOT_FOUND_ERRORCODE, new String[]{lastName});
     	return userRepository.findByLastName(lastName);
     }
  
     public User findByUserName(String username) throws UserAccessException{
-    	if(userRepository.findByUserName(username) == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, new String[]{username});
+    	if(userRepository.findByUserName(username) == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND,UserAccessException.USERNAME_NOT_FOUND_ERRORCODE, new String[]{username});
     	return userRepository.findByUserName(username);
     }
     
     public Long deleteUserByUserName(String username) throws UserAccessException{
-    	if(userRepository.findByUserName(username) == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, new String[]{username});
+    	if(userRepository.findByUserName(username) == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, UserAccessException.USERNAME_NOT_FOUND_ERRORCODE, new String[]{username});
     	return userRepository.deleteUserByUserName(username);
     }
     
     public Long deleteUserById(String id) throws UserAccessException{
-    	if(userRepository.findById(id) == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, new String[]{id}); 
+    	if(userRepository.findById(id) == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, UserAccessException.USERID_NOT_FOUND_ERRORCODE, new String[]{id}); 
     	return userRepository.deleteUserById(id);
     }
     
     public void save(User user) throws UserStorageException{
     	// User validation
     	if(user.getUserName() == null || user.getUserName().isEmpty()){
-    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_USERNAME, new String[]{});
+    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_USERNAME, UserStorageException.MISSING_MANDATORY_PARAMETER_USERNAME_ERRORCODE, new String[]{});
     	} else {
     		if(userRepository.findByUserName(user.getUserName()) != null){
-    			throw new UserStorageException(UserStorageException.DUPLICATE_USERNAME, new String[]{user.getUserName()});
+    			throw new UserStorageException(UserStorageException.DUPLICATE_USERNAME,UserStorageException.DUPLICATE_USERNAME_ERRORCODE, new String[]{user.getUserName()});
     		}
     	}
     	if(user.getPassword() == null || user.getPassword().isEmpty()){
-    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_PASSWORD, new String[]{});
+    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_PASSWORD, UserStorageException.MISSING_MANDATORY_PARAMETER_PASSWORD_ERRORCODE, new String[]{});
     	}
     	if(user.getEmailAddress() == null || user.getEmailAddress().isEmpty()){
-    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_EMAIL, new String[]{});
+    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_EMAIL, UserStorageException.MISSING_MANDATORY_PARAMETER_EMAIL_ERRORCODE, new String[]{});
     	} else {
-    		if(!INFRATools.isValidEmail(user.getEmailAddress())) throw new UserStorageException(UserStorageException.INVALID_PARAMETER_EMAIL, new String[]{user.getEmailAddress()});
+    		if(!INFRATools.isValidEmail(user.getEmailAddress())) throw new UserStorageException(UserStorageException.INVALID_PARAMETER_EMAIL, UserStorageException.INVALID_PARAMETER_EMAIL_ERRORCODE, new String[]{user.getEmailAddress()});
     	}
     	if(user.getRole() == null || user.getRole().isEmpty()){
-    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_ROLE, new String[]{});
+    		throw new UserStorageException(UserStorageException.MISSING_MANDATORY_PARAMETER_ROLE, UserStorageException.MISSING_MANDATORY_PARAMETER_ROLE_ERRORCODE, new String[]{});
     	}else{
     		if(user.getRole().equals("ADMIN")){
     			user.setRole("ROLE_ADMIN");
@@ -101,7 +101,7 @@ public class UserService implements UserDetailsService{
     
     public User updateUser(User updatedUser, String userid) throws UserAccessException{
     	User oldUser = userRepository.findById(userid);
-    	if(oldUser == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, new String[]{updatedUser.getId()});
+    	if(oldUser == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, UserAccessException.USERID_NOT_FOUND_ERRORCODE, new String[]{updatedUser.getId()});
     	
     	if(updatedUser.getFirstName() != null && !updatedUser.getFirstName().equalsIgnoreCase(oldUser.getFirstName())){
     		oldUser.setFirstName(updatedUser.getFirstName());
@@ -148,10 +148,12 @@ public class UserService implements UserDetailsService{
 		return null;
 	}
 	
-	public void rememberPassword(String username) throws UserAccessException{
+	public void rememberPassword(String username, String email) throws UserAccessException{
 		User u = userRepository.findByUserName(username);
-		if(u == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, new String[]{username});
+		if(u == null) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, UserAccessException.USERNAME_NOT_FOUND_ERRORCODE, new String[]{username});
+		if(!u.getEmailAddress().equals(email)) throw new UserAccessException(UserAccessException.USERNAME_NOT_FOUND, UserAccessException.USERNAME_NOT_FOUND_ERRORCODE, new String[]{username});
 		mailService.sendEmailWithPassword(u);
+		
 	}
 	
 }
