@@ -80,7 +80,7 @@ public class AssignmentService {
     	save(assignment);
     }
     
-    public List<Assignment> findAll() throws AssignmentAccessException {
+    public List<Assignment> findAll() throws AssignmentAccessException, UserAccessException {
 		List<Assignment> assignments = assignmentRepository.findAll();
 		if(assignments == null) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
@@ -88,7 +88,7 @@ public class AssignmentService {
 		return filterByLoginUser(assignments);
     }
 
-	public List<Assignment> findAll(Boolean addAttachmentDetails) throws AssignmentAccessException {
+	public List<Assignment> findAll(Boolean addAttachmentDetails) throws AssignmentAccessException, UserAccessException {
 		if(addAttachmentDetails) {
 			return addAttachmentDetails(findAll());
 		} else {
@@ -96,7 +96,7 @@ public class AssignmentService {
 		}
 	}
 
-	public Assignment findById(String id) throws AssignmentAccessException{
+	public Assignment findById(String id) throws AssignmentAccessException, UserAccessException{
 		Assignment queriedAssignment = assignmentRepository.findById(id);
 		if(queriedAssignment == null || checkValidAssignmentOwner(queriedAssignment) == false) {
 			throw new AssignmentAccessException(AssignmentAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
@@ -104,7 +104,7 @@ public class AssignmentService {
 		return queriedAssignment;
 	}
 	
-	public Assignment findById(String id, Boolean addAttachmentDetails) throws AssignmentAccessException{
+	public Assignment findById(String id, Boolean addAttachmentDetails) throws AssignmentAccessException, UserAccessException{
 		if(addAttachmentDetails) {
 			return addAttachmentDetails(findById(id));
 		} else {
@@ -112,7 +112,7 @@ public class AssignmentService {
 		}
 	}
 
-	public Assignment findByAssignmentName(String assignmentName) throws AssignmentAccessException {
+	public Assignment findByAssignmentName(String assignmentName) throws AssignmentAccessException, UserAccessException {
 		Assignment queriedAssignment = assignmentRepository.findByAssignmentName(assignmentName);
 		if(queriedAssignment == null || checkValidAssignmentOwner(queriedAssignment) == false) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_BY_NAME_TEXT_ID,new String[]{});
@@ -120,7 +120,7 @@ public class AssignmentService {
 		return queriedAssignment;
 	}
 	
-	public Assignment findByAssignmentName(String assignmentName, Boolean addAttachmentDetails) throws AssignmentAccessException {
+	public Assignment findByAssignmentName(String assignmentName, Boolean addAttachmentDetails) throws AssignmentAccessException, UserAccessException {
 		if(addAttachmentDetails) {
 			return addAttachmentDetails(findByAssignmentName(assignmentName));
 		} else {
@@ -128,7 +128,7 @@ public class AssignmentService {
 		}
 	}
 	
-	public List<Assignment> findByUserId(String userId) throws AssignmentAccessException {
+	public List<Assignment> findByUserId(String userId) throws AssignmentAccessException, UserAccessException {
 		List<Assignment> assignments =  assignmentRepository.findByUserId(new ObjectId(userId));
 		if(assignments == null) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_TEXT_ID,new String[]{userId});
@@ -136,7 +136,7 @@ public class AssignmentService {
 		return filterByLoginUser(assignments);
 	}
 	
-	public List<Assignment> findByUserId(String userId, Boolean addAttachmentDetails) throws AssignmentAccessException {
+	public List<Assignment> findByUserId(String userId, Boolean addAttachmentDetails) throws AssignmentAccessException, UserAccessException {
 		if (addAttachmentDetails) {
 			return addAttachmentDetails(findByUserId(userId));
 		} else {
@@ -165,13 +165,13 @@ public class AssignmentService {
 		save(queriedAssignment);
 	}
 	
-	public void deleteAssignmentById(String id) throws AssignmentAccessException{
+	public void deleteAssignmentById(String id) throws AssignmentAccessException, UserAccessException{
 		Assignment queriedAssignment = findById(id);
 		gridFsService.deleteFileList(queriedAssignment.listAttachmentIds());
 		assignmentRepository.delete(id);
 	}
 
-	public void deleteAll() throws AssignmentAccessException{
+	public void deleteAll() throws AssignmentAccessException, UserAccessException{
 		List<Assignment> queriedAssignments = findAll();
 		for (Assignment assignment : queriedAssignments) {
 			gridFsService.deleteFileList(assignment.listAttachmentIds());
@@ -229,7 +229,77 @@ public class AssignmentService {
 	}
 	
 	public Assignment save(Assignment assignment) throws AssignmentStorageException, UserAccessException {
-		if(assignment.getAssignmentName() == null) {
+		try {
+			if(validateAssignmentParameters(assignment)){
+				return assignmentRepository.save(assignment);
+			}
+			throw new AssignmentStorageException(AssignmentStorageException.UNEXPECTED_ERROR_HAPPENED, new String[]{});
+		} catch (DuplicateKeyException e) {
+			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
+			if(assignment.getId() == null) {
+				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME,new String[]{assignment.getAssignmentName()});
+			} else {
+				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME_ID,new String[]{assignment.getId(), assignment.getAssignmentName()});
+			}
+		}
+	}
+	
+	public Assignment createAssignment(Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
+		Assignment auxAssignment = null;
+		if(assignment.getId() == null) {
+			auxAssignment = save(assignment);
+			if(auxAssignment.getUser() != null){
+				User user = userService.findById(auxAssignment.getUser().getId());
+				mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, LocaleContextHolder.getLocale()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{assignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
+			}
+			mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.new.assignment.created", null, LocaleContextHolder.getLocale()), messageSource.getMessage("email.message.new.assignment.created", null, LocaleContextHolder.getLocale()), assignment);
+		}
+		return auxAssignment;
+	}
+	
+    public Assignment updateAllAttributesById(String id, Assignment updateAssignment, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException, NoSuchMessageException {
+    	if(checkValidAssignmentOwner(updateAssignment)){
+    		Assignment oldAssignment = findById(id);
+    		if(oldAssignment.getState() != Assignment.STATE_FINISHED || SecurityTools.currentUserHasAuthority("ROLE_ADMIN")){
+	    		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
+	    		oldAssignment.setDescription(updateAssignment.getDescription());
+	    		oldAssignment.setState(updateAssignment.getState());
+	    		if(updateAssignment.getStartDate().compareTo(updateAssignment.getEndDate()) <= 0){
+	    			oldAssignment.setStartDate(updateAssignment.getStartDate());
+		    		oldAssignment.setEndDate(updateAssignment.getEndDate());
+	    		} else {
+	    			throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID, new String[]{});
+	    		}
+	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
+	    		oldAssignment.setUser(userService.findById(updateAssignment.getUser().getId()));
+	    		oldAssignment.setTasks(updateAssignment.getTasks());
+	    		if(checkAssignmentVersion(oldAssignment, updateAssignment) || overwrite){
+	    			if(oldAssignment.getVersion() == null) {
+	    				oldAssignment.setVersion(1);
+	    			} else {
+	    				oldAssignment.setVersion(oldAssignment.getVersion()+1);
+	    			}
+	    			this.save(oldAssignment);
+	    		} else {
+	    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE, new String[]{updateAssignment.getAssignmentName()});
+	    		}
+	    		if(oldAssignment.getUser() != null && !oldAssignment.getUser().getUserName().equals(updateAssignment.getUser().getUserName())){
+	    			User user = oldAssignment.getUser();
+	    			mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, Locale.getDefault()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{oldAssignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
+	    		}
+	    		if(oldAssignment.getIsTemplate() != true) {
+	    			mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.assignment.modified", null, Locale.getDefault()), messageSource.getMessage("email.message.assignment.modified", null, Locale.getDefault()), oldAssignment);
+	    		}
+	    		return oldAssignment;
+    		}
+    		throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_FINISHED, new String[]{oldAssignment.getAssignmentName()});
+    	} else {
+    		throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_TO_MODIFY_ASSIGNMENT, new String[]{updateAssignment.getAssignmentName()});
+    	}
+    }
+    
+    public boolean validateAssignmentParameters(Assignment assignment) throws AssignmentStorageException, UserAccessException{
+    	if(assignment.getAssignmentName() == null) {
 			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"assignmentName"});
 		}
 		
@@ -321,71 +391,7 @@ public class AssignmentService {
 				}
 			}
 		}
-
-		try {
-			return assignmentRepository.save(assignment);	
-		} catch (DuplicateKeyException e) {
-			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
-			if(assignment.getId() == null) {
-				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME,new String[]{assignment.getAssignmentName()});
-			} else {
-				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME_ID,new String[]{assignment.getId(), assignment.getAssignmentName()});
-			}
-		}
-	}
-	
-	public Assignment createAssignment(Assignment assignment) throws AssignmentStorageException, AssignmentAccessException, UserAccessException {
-		Assignment auxAssignment = null;
-		if(assignment.getId() == null) {
-			auxAssignment = save(assignment);
-			if(auxAssignment.getUser() != null){
-				User user = userService.findById(auxAssignment.getUser().getId());
-				mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, LocaleContextHolder.getLocale()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{assignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
-			}
-			mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.new.assignment.created", null, LocaleContextHolder.getLocale()), messageSource.getMessage("email.message.new.assignment.created", null, LocaleContextHolder.getLocale()), assignment);
-		}
-		return auxAssignment;
-	}
-	
-    public Assignment updateAllAttributesById(String id, Assignment updateAssignment, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException, NoSuchMessageException {
-    	if(checkValidAssignmentOwner(updateAssignment)){
-    		Assignment oldAssignment = findById(id);
-    		if(oldAssignment.getState() != Assignment.STATE_FINISHED || SecurityTools.currentUserHasAuthority("ROLE_ADMIN")){
-	    		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
-	    		oldAssignment.setDescription(updateAssignment.getDescription());
-	    		oldAssignment.setState(updateAssignment.getState());
-	    		if(updateAssignment.getStartDate().compareTo(updateAssignment.getEndDate()) <= 0){
-	    			oldAssignment.setStartDate(updateAssignment.getStartDate());
-		    		oldAssignment.setEndDate(updateAssignment.getEndDate());
-	    		} else {
-	    			throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID, new String[]{});
-	    		}
-	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
-	    		oldAssignment.setUser(updateAssignment.getUser());
-	    		oldAssignment.setTasks(updateAssignment.getTasks());
-	    		if(checkAssignmentVersion(oldAssignment, updateAssignment) || overwrite){
-	    			if(oldAssignment.getVersion() == null) {
-	    				oldAssignment.setVersion(1);
-	    			} else {
-	    				oldAssignment.setVersion(oldAssignment.getVersion()+1);
-	    			}
-	    			this.save(oldAssignment);
-	    		} else {
-	    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE, new String[]{updateAssignment.getAssignmentName()});
-	    		}
-	    		if(oldAssignment.getUser() != null && !oldAssignment.getUser().getUserName().equals(updateAssignment.getUser().getUserName())){
-	    			User user = oldAssignment.getUser();
-	    			mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, Locale.getDefault()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{oldAssignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
-	    		}
-	    		if(oldAssignment.getIsTemplate() != true) {
-	    			mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.assignment.modified", null, Locale.getDefault()), messageSource.getMessage("email.message.assignment.modified", null, Locale.getDefault()), oldAssignment);
-	    		}
-	    		return oldAssignment;
-    		}
-    		throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_FINISHED, new String[]{oldAssignment.getAssignmentName()});
-    	} else {
-    		throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_TO_MODIFY_ASSIGNMENT, new String[]{updateAssignment.getAssignmentName()});
-    	}
+    	return true;
     }
     
     public Task updateAssignmentTaskById(String assignmentId, String taskId, Task updateTask, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException, InvocationTargetException, NoSuchMessageException {
@@ -395,21 +401,21 @@ public class AssignmentService {
     	return this.updateAllAttributesById(assignmentId, updateAssignment, overwrite).getTask(taskId, true);
     }
     
-    private boolean checkValidAssignmentOwner(Assignment assignment){
+    private boolean checkValidAssignmentOwner(Assignment assignment) throws UserAccessException{
     	//TODO: Remove that check for the current User later once security is enabled for assignment service.
     	// 		A user should always be logged in!
     	User currentUser = userService.getCurrentUser();
-    	
     	if(currentUser != null) {
 	    	final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 	    	if (authentication.getPrincipal() instanceof CustomUserDetails) {
-				User u = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+				User authenticatedUser = ((CustomUserDetails) authentication.getPrincipal()).getUser();
 				if(assignment.getIsTemplate() || assignment.getUser() == null) {
 					if(SecurityTools.hasAuthority((CustomUserDetails) authentication.getPrincipal(), "ROLE_ADMIN")){
 						return true;
 					}
 				} else {
-					if(assignment.getUser().getUserName().equals(u.getUserName()) || SecurityTools.hasAuthority((CustomUserDetails) authentication.getPrincipal(), "ROLE_ADMIN")){
+					User assignmentUser = userService.findById(assignment.getUser().getId());
+					if(assignmentUser.getUserName().equals(authenticatedUser.getUserName()) || SecurityTools.hasAuthority((CustomUserDetails) authentication.getPrincipal(), "ROLE_ADMIN")){
 						return true;
 					}
 				}
@@ -460,7 +466,7 @@ public class AssignmentService {
     	return true;
     }
         
-    private List<Assignment> filterByLoginUser(List<Assignment> assignments) {
+    private List<Assignment> filterByLoginUser(List<Assignment> assignments) throws UserAccessException {
     	//TODO: Remove that check for the current User later once security is enabled for assignment service.
     	// 		A user should always be logged in!
     	User currentUser = userService.getCurrentUser();

@@ -41,7 +41,7 @@ public class AssignmentController {
 
 	@RequestMapping(method=RequestMethod.GET)
     public List<Assignment> getAssignments(@RequestParam(value = "user_id", required=false) String userId,
-    										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException {
+    										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException, UserAccessException {
 		if(userId != null) {
 			return assignmentService.findByUserId(userId, addAttachmentDetails);
 		} else {
@@ -51,13 +51,13 @@ public class AssignmentController {
 	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.GET)
 	public Assignment getAssignmentById(@PathVariable("assignmentId") String assignmentId,
-										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException {
+										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException, UserAccessException {
 		return assignmentService.findById(assignmentId, addAttachmentDetails);
 	}
 	
 	@RequestMapping(value="/{assignmentId}/task", method=RequestMethod.GET)
 	public List<Task> getAssignmentTasks(@PathVariable("assignmentId") String assignmentId,
-										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException {
+										@RequestParam(required=false, value="addAttachmentDetails", defaultValue="false") Boolean addAttachmentDetails) throws AssignmentAccessException, UserAccessException {
 		return assignmentService.findById(assignmentId, addAttachmentDetails).getTasks();
 	}
 	
@@ -75,7 +75,7 @@ public class AssignmentController {
 	
 	@RequestMapping(value="/{assignmentId}", method=RequestMethod.DELETE)
 	@ResponseStatus(value=HttpStatus.NO_CONTENT)
-	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException {
+	public void deleteAssignmentById(@PathVariable("assignmentId") String assignmentId) throws AssignmentAccessException, AssignmentStorageException, UserAccessException {
 		assignmentService.deleteAssignmentById(assignmentId);
 	}
 	
