@@ -487,6 +487,9 @@ public class AssignmentService {
 			for (Task task : assignment.getTasks()) {
 				gridFsService.addAttachmentDetails(task.getAttachments());
 			}
+			if(assignment.getInspectionObject() != null) {
+				gridFsService.addAttachmentDetails(assignment.getInspectionObject().getAttachments());;
+			}
 		}
 		return assignments;
     }
@@ -495,6 +498,9 @@ public class AssignmentService {
 		gridFsService.addAttachmentDetails(assignment.getAttachments());
 		for (Task task : assignment.getTasks()) {
 			gridFsService.addAttachmentDetails(task.getAttachments());
+		}
+		if(assignment.getInspectionObject() != null) {
+			gridFsService.addAttachmentDetails(assignment.getInspectionObject().getAttachments());;
 		}
 		return assignment;
     }
