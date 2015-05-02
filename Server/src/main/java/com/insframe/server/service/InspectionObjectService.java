@@ -37,7 +37,7 @@ public class InspectionObjectService {
     		}
     		return queriedInspectionObjectList;
     	} else{
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_TEXT_ID, InspectionObjectAccessException.NO_OBJECTS_FOUND_ERRORCODE, new String[]{});
     	}
 	}
 	
@@ -47,7 +47,7 @@ public class InspectionObjectService {
 			if(addAttachmentDetails) gridFsService.addAttachmentDetails(queriedInspectionObject.getAttachments());
 			return queriedInspectionObject;
 		} else{
-			throw new InspectionObjectAccessException(InspectionObjectAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
+			throw new InspectionObjectAccessException(InspectionObjectAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID, InspectionObjectAccessException.OBJECT_ID_NOT_FOUND_ERRORCODE, new String[]{id});
 		}
 	}
 
@@ -62,7 +62,7 @@ public class InspectionObjectService {
     		}
     		return queriedInspectionObjectList;
     	} else{
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_CUSTOMERNAME_TEXT_ID,new String[]{customerName});
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_CUSTOMERNAME_TEXT_ID, InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_CUSTOMERNAME_ERRORCODE, new String[]{customerName});
     	}
 	}
 	
@@ -72,30 +72,29 @@ public class InspectionObjectService {
     		if(addAttachmentDetails) gridFsService.addAttachmentDetails(queriedInspectionObject.getAttachments());;
     		return queriedInspectionObject;
     	} else{
-    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_OBJECTNAME_TEXT_ID,new String[]{objectName});
+    		throw new InspectionObjectAccessException(InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_OBJECTNAME_TEXT_ID, InspectionObjectAccessException.NO_OBJECTS_FOUND_BY_OBJECTNAME_ERRORCODE, new String[]{objectName});
     	}
 	}
 	
     public InspectionObject save(InspectionObject inspectionObject) throws InspectionObjectStorageException {
 		if(inspectionObject.getObjectName() == null || inspectionObject.getObjectName() == "") {
-				throw new InspectionObjectStorageException(InspectionObjectStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"objectName"});
+				throw new InspectionObjectStorageException(InspectionObjectStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID, InspectionObjectStorageException.MISSING_MANDATORY_PARAMETER_ERRORCODE, new String[]{"objectName"});
 		}
 		
 		if(inspectionObject.getAttachments() == null) {
 			inspectionObject.setAttachments(new ArrayList<Attachment>());
 		}
 		if(gridFsService.checkAttachmentsExist(inspectionObject.listAttachmentIds()) == false) {
-			throw new InspectionObjectStorageException(InspectionObjectStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
+			throw new InspectionObjectStorageException(InspectionObjectStorageException.INVALID_ATTACHMENT_REF_TEXT_ID, InspectionObjectStorageException.INVALID_ATTACHMENT_REF, new String[]{});
 		}
 		
 		try {
 			return inspectionObjectRepository.save(inspectionObject);
 		} catch (DuplicateKeyException e) {
-			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
 			if(inspectionObject.getId() == null) {
-				throw new InspectionObjectStorageException(InspectionObjectStorageException.DUPLICATE_KEY_NAME,new String[]{inspectionObject.getObjectName()});
+				throw new InspectionObjectStorageException(InspectionObjectStorageException.DUPLICATE_KEY_NAME_TEXT_ID, InspectionObjectStorageException.DUPLICATE_KEY_NAME_ERRORCODE, new String[]{inspectionObject.getObjectName()});
 			} else {
-				throw new InspectionObjectStorageException(InspectionObjectStorageException.DUPLICATE_KEY_NAME_ID,new String[]{inspectionObject.getId(), inspectionObject.getObjectName()});
+				throw new InspectionObjectStorageException(InspectionObjectStorageException.DUPLICATE_KEY_NAME_ID_TEXT_ID,InspectionObjectStorageException.DUPLICATE_KEY_NAME_ID_ERRORCODE, new String[]{inspectionObject.getId(), inspectionObject.getObjectName()});
 			}
 		}
 	}

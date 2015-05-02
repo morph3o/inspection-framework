@@ -91,7 +91,7 @@ public class InspectionObjectController {
 					inspectionObjectService.addAttachmentToInspectionObject(inspectionObjectId, multipartFile.getInputStream(), multipartFile.getOriginalFilename(), multipartFile.getContentType(), new FileMetaData(""));
 				}
 	        } else {
-	        	throw new FileUploadException(FileUploadException.EMPTY_FILE_UPLOAD_TEXT_ID,new String[]{});
+	        	throw new FileUploadException(FileUploadException.EMPTY_FILE_UPLOAD_TEXT_ID, FileUploadException.EMPTY_FILE_UPLOAD_ERRORCODE, new String[]{});
 	        }
 		}
 	}

@@ -6,12 +6,14 @@ public class InspectionFrameworkBaseException extends Exception {
 	
 	private String messageId;
 	private String[] args;
+	private int errorCode;
 	
 	
-	public InspectionFrameworkBaseException(String messageId, String... args) {
+	public InspectionFrameworkBaseException(String messageId, int errorCode, String... args) {
 		super(messageId);
 		this.messageId = messageId;
 		this.args = args;
+		this.errorCode = errorCode;
 	}
 
 	public String getMessageId() {
@@ -21,4 +23,9 @@ public class InspectionFrameworkBaseException extends Exception {
 	public String[] getArgs() {
 		return args;
 	}
+
+	public int getErrorCode() {
+		return errorCode;
+	}
+	
 }

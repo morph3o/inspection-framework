@@ -42,6 +42,10 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public TokenBasedRememberMeServices rememberMeServices() {
+//    	TokenBasedRememberMeServices tokenServices;
+    	
+//        tokenServices = new TokenBasedRememberMeServices("remember-me-key", userService);
+//        tokenServices.setTokenValiditySeconds(1209600);
         return new TokenBasedRememberMeServices("remember-me-key", userService);
     }
 
@@ -72,27 +76,27 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 .antMatchers("/", "/users/", "/users/**", "/inspectionobject/", "/inspectionobject/**", "/assignment/", "/assignment/**", "/attachment/", "/attachment/**").permitAll()
                 .anyRequest().authenticated()
-                .and()
-        	.exceptionHandling()
-        		.authenticationEntryPoint(authenticationEntryPoint)
-        		.accessDeniedHandler(accessDeniedHandler)
-        		.and()
-            .formLogin()
-            	.permitAll()
-            	.loginProcessingUrl("/login")
-            	.usernameParameter("username")
-            	.passwordParameter("password")
-            	.successHandler(successHandler)
-            	.failureHandler(failureHandler)
-                .and()
-            .logout()
-            	.permitAll()
-            	.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-            	.deleteCookies("JSESSIONID")
-            	.logoutSuccessHandler(logoutHandler)
-            	.and()
-            .sessionManagement()
-            .maximumSessions(10);
+            .and()
+        		.exceptionHandling()
+        			.authenticationEntryPoint(authenticationEntryPoint)
+        			.accessDeniedHandler(accessDeniedHandler)
+        	.and()
+            	.formLogin()
+	            	.permitAll()
+	            	.loginProcessingUrl("/login")
+	            	.usernameParameter("username")
+	            	.passwordParameter("password")
+	            	.successHandler(successHandler)
+	            	.failureHandler(failureHandler)
+            .and()
+            	.logout()
+	            	.permitAll()
+	            	.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+	            	.deleteCookies("JSESSIONID")
+	            	.logoutSuccessHandler(logoutHandler)
+            .and()
+            	.sessionManagement()
+            		.maximumSessions(10);
 	   
         http.authorizeRequests()
 	        	.antMatchers("/login", "/favicon.ico", "/resources/**").permitAll()

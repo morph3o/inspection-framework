@@ -36,8 +36,9 @@ class GeneralExceptionHandler {
 	public JSONErrorMessage exception(Exception exception, HttpServletRequest req) {
 		String errorMessage = exception.getMessage(); 
         String errorURL = req.getRequestURL().toString();
+        int errorCode = 5000;
          
-        return new JSONErrorMessage(errorMessage, errorURL);
+        return new JSONErrorMessage(errorMessage, errorURL, errorCode);
 	}
 	
 	@ExceptionHandler({InspectionFrameworkBaseException.class})
@@ -46,7 +47,8 @@ class GeneralExceptionHandler {
 	public JSONErrorMessage objectNotFound(HttpServletRequest req, InspectionFrameworkBaseException ex) {
 		String errorMessage = messageSource.getMessage(ex.getMessageId(), ex.getArgs(), LocaleContextHolder.getLocale());
         String errorURL = req.getRequestURL().toString();
+        int errorCode = ex.getErrorCode();
          
-        return new JSONErrorMessage(errorMessage, errorURL);
+        return new JSONErrorMessage(errorMessage, errorURL, errorCode);
     }
 }

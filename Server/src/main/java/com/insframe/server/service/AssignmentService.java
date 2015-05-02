@@ -54,7 +54,7 @@ public class AssignmentService {
 			assignment.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
 			save(assignment);
 		} else {
-			throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
+			throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID, AssignmentStorageException.INVALID_TEMPLATE_ATTR_ERRORCODE, new String[]{"attachments"});
 		}
 	}
     
@@ -66,10 +66,10 @@ public class AssignmentService {
 				task.addAttachment(gridFsService.store(inputStream, fileName, contentType, metaData));
 				save(assignment);
 			} else {
-				throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,new String[]{assignmentId, taskId});
+				throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,AssignmentAccessException.TASK_ID_NOT_FOUND_ERRORCODE, new String[]{assignmentId, taskId});
 			}
 		} else {
-			throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"attachments"});
+			throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,AssignmentStorageException.INVALID_TEMPLATE_ATTR_ERRORCODE, new String[]{"attachments"});
 		}
 		
     }
@@ -83,7 +83,7 @@ public class AssignmentService {
     public List<Assignment> findAll() throws AssignmentAccessException, UserAccessException {
 		List<Assignment> assignments = assignmentRepository.findAll();
 		if(assignments == null) {
-			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_TEXT_ID,new String[]{});
+			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_TEXT_ID, AssignmentAccessException.NO_OBJECTS_FOUND_ERRORCODE, new String[]{});
 		}
 		return filterByLoginUser(assignments);
     }
@@ -99,7 +99,7 @@ public class AssignmentService {
 	public Assignment findById(String id) throws AssignmentAccessException, UserAccessException{
 		Assignment queriedAssignment = assignmentRepository.findById(id);
 		if(queriedAssignment == null || checkValidAssignmentOwner(queriedAssignment) == false) {
-			throw new AssignmentAccessException(AssignmentAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID,new String[]{id});
+			throw new AssignmentAccessException(AssignmentAccessException.OBJECT_ID_NOT_FOUND_TEXT_ID, AssignmentAccessException.OBJECT_ID_NOT_FOUND_ERRORCODE, new String[]{id});
 		}
 		return queriedAssignment;
 	}
@@ -115,7 +115,7 @@ public class AssignmentService {
 	public Assignment findByAssignmentName(String assignmentName) throws AssignmentAccessException, UserAccessException {
 		Assignment queriedAssignment = assignmentRepository.findByAssignmentName(assignmentName);
 		if(queriedAssignment == null || checkValidAssignmentOwner(queriedAssignment) == false) {
-			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_BY_NAME_TEXT_ID,new String[]{});
+			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_FOUND_BY_NAME_TEXT_ID, AssignmentAccessException.NO_OBJECTS_FOUND_BY_NAME_ERRORCODE, new String[]{});
 		}
 		return queriedAssignment;
 	}
@@ -131,7 +131,7 @@ public class AssignmentService {
 	public List<Assignment> findByUserId(String userId) throws AssignmentAccessException, UserAccessException {
 		List<Assignment> assignments =  assignmentRepository.findByUserId(new ObjectId(userId));
 		if(assignments == null) {
-			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_TEXT_ID,new String[]{userId});
+			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_TEXT_ID, AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_ERRORCODE, new String[]{userId});
 		}
 		return filterByLoginUser(assignments);
 	}
@@ -149,7 +149,7 @@ public class AssignmentService {
 		if(queriedTask != null) {
 			return queriedTask;
 		} else {
-			throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,new String[]{assignmentId, taskId});
+			throw new AssignmentAccessException(AssignmentAccessException.TASK_ID_NOT_FOUND_TEXT_ID,AssignmentAccessException.TASK_ID_NOT_FOUND_ERRORCODE, new String[]{assignmentId, taskId});
 		}
 	}
 	
@@ -233,13 +233,12 @@ public class AssignmentService {
 			if(validateAssignmentParameters(assignment)){
 				return assignmentRepository.save(assignment);
 			}
-			throw new AssignmentStorageException(AssignmentStorageException.UNEXPECTED_ERROR_HAPPENED, new String[]{});
+			throw new AssignmentStorageException(AssignmentStorageException.UNEXPECTED_ERROR_HAPPENED_TEXT_ID,AssignmentStorageException.UNEXPECTED_ERROR_HAPPENED_ERRORCODE, new String[]{});
 		} catch (DuplicateKeyException e) {
-			// TODO: should be more detailed here! Only catch Duplicate Key Exception, but what is right exception name to catch?
 			if(assignment.getId() == null) {
-				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME,new String[]{assignment.getAssignmentName()});
+				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME_TEXT_ID,AssignmentStorageException.DUPLICATE_KEY_NAME_ERRORCODE,new String[]{assignment.getAssignmentName()});
 			} else {
-				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME_ID,new String[]{assignment.getId(), assignment.getAssignmentName()});
+				throw new AssignmentStorageException(AssignmentStorageException.DUPLICATE_KEY_NAME_ID_TEXT_ID, AssignmentStorageException.DUPLICATE_KEY_NAME_ID_ERRORCODE, new String[]{assignment.getId(), assignment.getAssignmentName()});
 			}
 		}
 	}
@@ -268,7 +267,7 @@ public class AssignmentService {
 	    			oldAssignment.setStartDate(updateAssignment.getStartDate());
 		    		oldAssignment.setEndDate(updateAssignment.getEndDate());
 	    		} else {
-	    			throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID, new String[]{});
+	    			throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_TEXT_ID, AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_ERRORCODE, new String[]{});
 	    		}
 	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
 	    		oldAssignment.setUser(userService.findById(updateAssignment.getUser().getId()));
@@ -281,7 +280,7 @@ public class AssignmentService {
 	    			}
 	    			this.save(oldAssignment);
 	    		} else {
-	    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE, new String[]{updateAssignment.getAssignmentName()});
+	    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE_TEXT_ID, AssignmentStorageException.UPDATED_VERSION_AVAILABLE_ERRORCODE, new String[]{updateAssignment.getAssignmentName()});
 	    		}
 	    		if(oldAssignment.getUser() != null && !oldAssignment.getUser().getUserName().equals(updateAssignment.getUser().getUserName())){
 	    			User user = oldAssignment.getUser();
@@ -292,55 +291,55 @@ public class AssignmentService {
 	    		}
 	    		return oldAssignment;
     		}
-    		throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_FINISHED, new String[]{oldAssignment.getAssignmentName()});
+    		throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_FINISHED_TEXT_ID, AssignmentStorageException.ASSIGNMENT_FINISHED_ERRORCODE, new String[]{oldAssignment.getAssignmentName()});
     	} else {
-    		throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_TO_MODIFY_ASSIGNMENT, new String[]{updateAssignment.getAssignmentName()});
+    		throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_TO_MODIFY_ASSIGNMENT_TEXT_ID, AssignmentStorageException.INVALID_USER_TO_MODIFY_ASSIGNMENT_ERRORCODE, new String[]{updateAssignment.getAssignmentName()});
     	}
     }
     
     public boolean validateAssignmentParameters(Assignment assignment) throws AssignmentStorageException, UserAccessException{
     	if(assignment.getAssignmentName() == null) {
-			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"assignmentName"});
+			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID, AssignmentStorageException.MISSING_MANDATORY_PARAMETER_ERRORCODE, new String[]{"assignmentName"});
 		}
 		
 		if(assignment.getIsTemplate() == null) {
-			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"isTemplate"});
+			throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID, AssignmentStorageException.MISSING_MANDATORY_PARAMETER_ERRORCODE, new String[]{"isTemplate"});
 		}
 		
 		if(assignment.getIsTemplate() == false) {
 			if(checkInspectionObjectExists(assignment) == false) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_REF_TEXT_ID,new String[]{});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_USER_REF_TEXT_ID, AssignmentStorageException.INVALID_USER_REF_ERROCODE, new String[]{});
 			}
 			if(checkUserExists(assignment) == false) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_INSP_OBJECT_REF_TEXT_ID,new String[]{});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_INSP_OBJECT_REF_TEXT_ID, AssignmentStorageException.INVALID_INSP_OBJECT_REF_ERRORCODE, new String[]{});
 			}
 			if(assignment.getAttachments() == null) {
 				assignment.setAttachments(new ArrayList<Attachment>());
 			}
 			if(checkValidStartAndEndDate(assignment) == false){
-				throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID, new String[]{});
+				throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_TEXT_ID, AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_ERRORCODE, new String[]{});
 			}
 			if(gridFsService.checkAttachmentsExist(assignment.listAttachmentIds()) == false) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,AssignmentStorageException.INVALID_ATTACHMENT_REF_ERRORCODE, new String[]{});
 			}
 		} else {
 			if (assignment.getInspectionObject() != null) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"inspectionObject"});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID, AssignmentStorageException.INVALID_TEMPLATE_ATTR_ERRORCODE, new String[]{"inspectionObject"});
 			}
 			if (assignment.getUser() != null) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"user"});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID, AssignmentStorageException.INVALID_TEMPLATE_ATTR_ERRORCODE, new String[]{"user"});
 			}
 			if (assignment.getStartDate() != null) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"startDate"});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID, AssignmentStorageException.INVALID_TEMPLATE_ATTR_ERRORCODE, new String[]{"startDate"});
 			}
 			if (assignment.getEndDate() != null) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID,new String[]{"endDate"});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_TEMPLATE_ATTR_TEXT_ID, AssignmentStorageException.INVALID_TEMPLATE_ATTR_ERRORCODE, new String[]{"endDate"});
 			}
 			if(assignment.getAttachments() == null) {
 				assignment.setAttachments(new ArrayList<Attachment>());
 			}
 			if(gridFsService.checkAttachmentsExist(assignment.listAttachmentIds()) == false) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID,new String[]{});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_ATTACHMENT_REF_TEXT_ID, AssignmentStorageException.INVALID_ATTACHMENT_REF_ERRORCODE, new String[]{});
 			}
 		}
 		
@@ -358,7 +357,7 @@ public class AssignmentService {
 			assignment.setState(Assignment.STATE_INITIAL);
 		} else {
 			if(assignment.getState() < Assignment.STATE_INITIAL || assignment.getState() > Assignment.STATE_FINISHED) {
-				throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(assignment.getState())});
+				throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID, AssignmentStorageException.INVALID_STATE_ERRORCODE, new String[]{Integer.toString(assignment.getState())});
 			}
 		}
 		
@@ -371,7 +370,7 @@ public class AssignmentService {
 		} else {
 			for (Task task : assignment.getTasks()) {
 				if(task.getTaskName() == null || task.getTaskName().equals("")) {
-					throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID,new String[]{"task name"});
+					throw new AssignmentStorageException(AssignmentStorageException.MISSING_MANDATORY_PARAMETER_TEXT_ID, AssignmentStorageException.MISSING_MANDATORY_PARAMETER_ERRORCODE, new String[]{"task name"});
 				}
 				if(task.getId() == null) {
 					task.setId(ObjectId.get().toString());
@@ -386,7 +385,7 @@ public class AssignmentService {
 					task.setState(Task.STATE_INITIAL);
 				} else {
 					if(task.getState() < Task.STATE_INITIAL || task.getState() > Task.STATE_ERROR) {
-						throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID,new String[]{Integer.toString(task.getState()), task.getTaskName()});
+						throw new AssignmentStorageException(AssignmentStorageException.INVALID_STATE_TEXT_ID, AssignmentStorageException.INVALID_STATE_ERRORCODE, new String[]{Integer.toString(task.getState()), task.getTaskName()});
 					}
 				}
 			}
