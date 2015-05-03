@@ -274,20 +274,38 @@ public class AssignmentService {
 	
     public Assignment updateAllAttributesById(String id, Assignment updateAssignment, boolean overwrite) throws AssignmentAccessException, AssignmentStorageException, UserAccessException, NoSuchMessageException {
     	if(checkValidAssignmentOwner(updateAssignment)){
+    		boolean detailModification = false, newUser = false;
     		Assignment oldAssignment = findById(id);
     		if(oldAssignment.getState() != Assignment.STATE_FINISHED || SecurityTools.currentUserHasAuthority("ROLE_ADMIN")){
-	    		oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
-	    		oldAssignment.setDescription(updateAssignment.getDescription());
-	    		oldAssignment.setState(updateAssignment.getState());
-	    		if(updateAssignment.getStartDate().compareTo(updateAssignment.getEndDate()) <= 0){
-	    			oldAssignment.setStartDate(updateAssignment.getStartDate());
-		    		oldAssignment.setEndDate(updateAssignment.getEndDate());
-	    		} else {
-	    			throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_TEXT_ID, AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_ERRORCODE, new String[]{});
+    			if(oldAssignment.getUser() != null && updateAssignment.getUser() != null && !oldAssignment.getUser().getId().equalsIgnoreCase(updateAssignment.getUser().getId())){
+    				detailModification = true;
+    				newUser = true;
+    				oldAssignment.setUser(userService.findById(updateAssignment.getUser().getId()));
+    			}
+    			if(!oldAssignment.getAssignmentName().equals(updateAssignment.getAssignmentName())){
+    				detailModification = true;
+    				oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
+    			}
+    			if(!oldAssignment.getDescription().equals(updateAssignment.getDescription())){
+    				detailModification = true;
+    				oldAssignment.setDescription(updateAssignment.getDescription());
+    			}
+	    		if(!oldAssignment.getStartDate().equals(updateAssignment.getStartDate())){
+	    			detailModification = true;
+	    			oldAssignment.setState(updateAssignment.getState());
+		    		if(updateAssignment.getStartDate().compareTo(updateAssignment.getEndDate()) <= 0){
+		    			oldAssignment.setStartDate(updateAssignment.getStartDate());
+			    		oldAssignment.setEndDate(updateAssignment.getEndDate());
+		    		} else {
+		    			throw new AssignmentStorageException(AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_TEXT_ID, AssignmentStorageException.ASSIGNMENT_STARTDATE_ENDDATE_NOT_VALID_ERRORCODE, new String[]{});
+		    		}
 	    		}
-	    		oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
-	    		if(updateAssignment.getUser() != null) {
-	    			oldAssignment.setUser(userService.findById(updateAssignment.getUser().getId()));
+	    		if(!oldAssignment.getInspectionObject().getId().equalsIgnoreCase(updateAssignment.getInspectionObject().getId())){
+	    			detailModification = true;
+	    			oldAssignment.setInspectionObject(updateAssignment.getInspectionObject());
+	    		}
+	    		if(oldAssignment.getTasks().size() != updateAssignment.getTasks().size()){
+	    			detailModification = true;
 	    		}
 	    		oldAssignment.setTasks(updateAssignment.getTasks());
 	    		if(checkAssignmentVersion(oldAssignment, updateAssignment) || overwrite){
@@ -300,11 +318,11 @@ public class AssignmentService {
 	    		} else {
 	    			throw new AssignmentStorageException(AssignmentStorageException.UPDATED_VERSION_AVAILABLE_TEXT_ID, AssignmentStorageException.UPDATED_VERSION_AVAILABLE_ERRORCODE, new String[]{updateAssignment.getAssignmentName()});
 	    		}
-	    		if(oldAssignment.getUser() != null && !oldAssignment.getUser().getUserName().equals(updateAssignment.getUser().getUserName())){
+	    		if(oldAssignment.getUser() != null && newUser){
 	    			User user = oldAssignment.getUser();
 	    			mailService.sendEmail(user.getEmailAddress(), messageSource.getMessage("email.subject.new.assignment.assigned", null, Locale.getDefault()), messageSource.getMessage("email.message.new.assignment.assigned", new String[]{oldAssignment.getAssignmentName()}, LocaleContextHolder.getLocale()));
 	    		}
-	    		if(oldAssignment.getIsTemplate() != true) {
+	    		if(oldAssignment.getIsTemplate() != true && detailModification) {
 	    			mailService.sendEmailToAdminsWithAssignmentDetails(messageSource.getMessage("email.subject.assignment.modified", null, Locale.getDefault()), messageSource.getMessage("email.message.assignment.modified", null, Locale.getDefault()), oldAssignment);
 	    		}
 	    		return oldAssignment;
