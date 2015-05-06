@@ -290,9 +290,14 @@ public class AssignmentService {
     				detailModification = true;
     				oldAssignment.setDescription(updateAssignment.getDescription());
     			}
+    			if(oldAssignment.getState() != updateAssignment.getState()){
+    				oldAssignment.setState(updateAssignment.getState());
+    				if(oldAssignment.getState() == Assignment.STATE_FINISHED){
+    					detailModification = true;
+    				}
+    			}
 	    		if(!oldAssignment.getStartDate().equals(updateAssignment.getStartDate())){
 	    			detailModification = true;
-	    			oldAssignment.setState(updateAssignment.getState());
 		    		if(updateAssignment.getStartDate().compareTo(updateAssignment.getEndDate()) <= 0){
 		    			oldAssignment.setStartDate(updateAssignment.getStartDate());
 			    		oldAssignment.setEndDate(updateAssignment.getEndDate());
