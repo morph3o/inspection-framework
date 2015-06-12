@@ -16,6 +16,7 @@ import com.insframe.server.data.repository.UserRepository;
 import com.insframe.server.error.AssignmentAccessException;
 import com.insframe.server.error.UserAccessException;
 import com.insframe.server.error.UserStorageException;
+import com.insframe.server.model.Assignment;
 import com.insframe.server.model.User;
 import com.insframe.server.security.CustomUserDetails;
 import com.insframe.server.tools.INFRATools;
@@ -58,17 +59,13 @@ public class UserService implements UserDetailsService{
     }
     
     public void deleteUserById(String id) throws UserAccessException {
-    	@SuppressWarnings("unused")
-		boolean noReferenceFound;
     	if(userRepository.findById(id) == null) throw new UserAccessException(UserAccessException.USERID_NOT_FOUND, UserAccessException.USERID_NOT_FOUND_ERRORCODE, new String[]{id});
-    	try {
-			assignmentService.findByUserId(id);
-			noReferenceFound = false;
+		try {
+			if(assignmentService.findByUserId(id).size() > 0) throw new UserAccessException(UserAccessException.USER_ASSIGNED_IN_ASSIGNMENTS, UserAccessException.USER_ASSIGNED_IN_ASSIGNMENTS_ERRORCODE, new String[]{id}); 
 		} catch (AssignmentAccessException e) {
-			noReferenceFound = true;
+			userRepository.deleteUserById(id); 
 		}
-    	if(noReferenceFound == false) throw new UserAccessException(UserAccessException.USER_ASSIGNED_IN_ASSIGNMENTS, UserAccessException.USER_ASSIGNED_IN_ASSIGNMENTS_ERRORCODE, new String[]{id});
-    	userRepository.deleteUserById(id);
+		userRepository.deleteUserById(id);
     }
     
     public void save(User user) throws UserStorageException{

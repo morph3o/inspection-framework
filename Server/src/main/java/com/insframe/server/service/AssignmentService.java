@@ -130,7 +130,7 @@ public class AssignmentService {
 	
 	public List<Assignment> findByUserId(String userId) throws AssignmentAccessException, UserAccessException {
 		List<Assignment> assignments =  assignmentRepository.findByUserId(new ObjectId(userId));
-		if(assignments == null) {
+		if(assignments == null || assignments.size() == 0) {
 			throw new AssignmentAccessException(AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_TEXT_ID, AssignmentAccessException.NO_OBJECTS_BY_USER_ID_FOUND_ERRORCODE, new String[]{userId});
 		}
 		return filterByLoginUser(assignments);
