@@ -286,7 +286,7 @@ public class AssignmentService {
     				detailModification = true;
     				oldAssignment.setAssignmentName(updateAssignment.getAssignmentName());
     			}
-    			if(!oldAssignment.getDescription().equals(updateAssignment.getDescription())){
+    			if(updateAssignment.getDescription() != null && !oldAssignment.getDescription().equals(updateAssignment.getDescription())){
     				detailModification = true;
     				oldAssignment.setDescription(updateAssignment.getDescription());
     			}
